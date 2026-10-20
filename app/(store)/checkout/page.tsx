@@ -12,26 +12,57 @@ const STEPS = ["Details", "Payment", "Review"];
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, subtotal, clearCart, ready, toast } = useStore();
+  const { cart, subtotal, clearCart, ready, toast, syncCart } = useStore();
   const [pub, setPub] = useState<Pub | null>(null);
   const [step, setStep] = useState(0);
   const [method, setMethod] = useState<"cod" | "bank">("cod");
   const [ref, setRef] = useState("");
   const [c, setC] = useState({ name: "", phone: "", email: "", address: "", city: "", notes: "" });
+  const [hp, setHp] = useState(""); // honeypot, hidden from people
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [restored, setRestored] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/settings").then((r) => r.json()).then(setPub);
   }, []);
+  // Keep what the customer typed if they leave and come back (cleared once the order is placed).
+  useEffect(() => {
+    try {
+      const d = JSON.parse(localStorage.getItem("freshora_checkout") ?? "null");
+      if (d?.c) setC((x) => ({ ...x, ...d.c }));
+      if (d?.method === "bank" || d?.method === "cod") setMethod(d.method);
+    } catch {}
+    setRestored(true);
+  }, []);
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      localStorage.setItem("freshora_checkout", JSON.stringify({ c, method }));
+    } catch {}
+  }, [c, method, restored]);
+  // The saved cart can be days old: pull current prices and stock before showing totals.
+  useEffect(() => {
+    if (ready) syncCart().then((msgs) => msgs.slice(0, 3).forEach((m) => toast(m, "info")));
+  }, [ready, syncCart, toast]);
 
-  if (!ready || !pub) return <div className="container-x py-12">Loading…</div>;
+  if (!ready || !pub)
+    return (
+      <div className="container-x max-w-5xl py-8" aria-busy="true" aria-label="Loading checkout">
+        <div className="skeleton mb-6 h-12 w-56" />
+        <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
+          <div className="skeleton h-[420px]" />
+          <div className="skeleton h-64" />
+        </div>
+      </div>
+    );
   if (cart.length === 0)
     return (
       <div className="container-x flex flex-col items-center gap-3 py-20 text-center">
         <h1 className="text-3xl">Your cart is empty</h1>
         <Link href="/shop" className="btn">
-          Go shopping
+          Browse products
         </Link>
       </div>
     );
@@ -40,9 +71,41 @@ export default function CheckoutPage() {
   const remaining = pub.freeShippingThreshold > 0 ? pub.freeShippingThreshold - subtotal : 0;
   const set = (k: keyof typeof c) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setC({ ...c, [k]: e.target.value });
 
+  // Field rules. An error shows after the field is left (blur) or after a failed submit, and clears on the first keystroke that edits the field.
+  const rules: Record<keyof typeof c, (v: string) => string> = {
+    name: (v) => (v.trim().length < 2 ? "Enter your full name" : ""),
+    phone: (v) => (v.replace(/\D/g, "").length < 10 ? "Enter a phone number with at least 10 digits, like 0300 1234567" : ""),
+    email: (v) => (v && !/^\S+@\S+\.\S+$/.test(v.trim()) ? "Enter an email like name@example.com, or leave it empty" : ""),
+    address: (v) => (v.trim().length < 5 ? "Enter your street address" : ""),
+    city: (v) => (v.trim().length < 2 ? "Enter your city" : ""),
+    notes: () => "",
+  };
+  const fieldError = (k: keyof typeof c) => (touched[k] ? rules[k](c[k]) : "");
+  const bind = (k: keyof typeof c) => ({
+    id: `c-${k}`,
+    name: k,
+    value: c[k],
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setTouched((t) => ({ ...t, [k]: false }));
+      set(k)(e);
+    },
+    onBlur: () => setTouched((t) => ({ ...t, [k]: true })),
+    "aria-invalid": fieldError(k) ? true : undefined,
+    "aria-describedby": fieldError(k) ? `c-${k}-err` : undefined,
+  });
+  const err = (k: keyof typeof c) => (fieldError(k) ? <p id={`c-${k}-err`} className="mt-1.5 text-sm text-danger-fg">{fieldError(k)}</p> : null);
+
   function next(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (step === 0) {
+      const keys = Object.keys(rules) as (keyof typeof c)[];
+      const bad = keys.find((k) => rules[k](c[k]));
+      if (bad) {
+        setTouched(Object.fromEntries(keys.map((k) => [k, true])));
+        return void document.getElementById(`c-${bad}`)?.focus();
+      }
+    }
     if (step === 1 && method === "bank" && !ref.trim()) return setError("Enter your bank transfer reference");
     setStep((s) => s + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -51,6 +114,13 @@ export default function CheckoutPage() {
   async function place() {
     setBusy(true);
     setError("");
+    // Re-check right before ordering so the customer never pays a price they didn't see.
+    const changes = await syncCart();
+    if (changes.length) {
+      setError(`${changes.join(". ")}. Please review your order and place it again.`);
+      setBusy(false);
+      return;
+    }
     const res = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -59,6 +129,7 @@ export default function CheckoutPage() {
         customer: c,
         paymentMethod: method,
         paymentReference: method === "bank" ? ref : undefined,
+        website: hp,
       }),
     });
     const data = await res.json();
@@ -69,12 +140,15 @@ export default function CheckoutPage() {
       return;
     }
     clearCart();
+    try {
+      localStorage.removeItem("freshora_checkout");
+    } catch {}
     router.push(`/order/${data.orderNumber}`);
   }
 
   return (
     <div className="container-x max-w-5xl py-8">
-      <h1 className="mb-6 text-3xl sm:text-4xl">Checkout</h1>
+      <h1 className="mb-6 title-page">Checkout</h1>
 
       {/* Progress */}
       <ol className="mb-8 flex items-center" aria-label="Checkout progress">
@@ -84,9 +158,9 @@ export default function CheckoutPage() {
               type="button"
               disabled={i >= step}
               onClick={() => setStep(i)}
-              className="flex items-center gap-2 disabled:cursor-default"
+              className="flex min-h-11 min-w-11 items-center gap-2 disabled:cursor-default"
             >
-              <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold transition ${i < step ? "bg-mint text-[#06141b]" : i === step ? "bg-[var(--btn-bg)] text-[var(--btn-fg)]" : "border border-line text-muted"}`}>
+              <span className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition ${i < step ? "bg-mint text-[#06141b]" : i === step ? "bg-[var(--btn-bg)] text-[var(--btn-fg)]" : "border border-line text-muted"}`}>
                 {i < step ? <Icon name="check" size={16} /> : i + 1}
               </span>
               <span className={`hidden text-sm font-semibold sm:block ${i === step ? "" : "text-muted"}`}>{s}</span>
@@ -99,34 +173,40 @@ export default function CheckoutPage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
         <div>
           {step === 0 && (
-            <form onSubmit={next} className="card space-y-4 p-6">
+            <form onSubmit={next} noValidate className="card space-y-4 p-6">
               <h2 className="text-xl">Delivery details</h2>
               <p className="text-sm text-muted">No account needed. We only use this to deliver your order.</p>
+              <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden value={hp} onChange={(e) => setHp(e.target.value)} className="absolute -left-[9999px] h-0 w-0 opacity-0" />
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="label" htmlFor="c-name">Full name *</label>
-                  <input id="c-name" className="input" required autoComplete="name" value={c.name} onChange={set("name")} />
+                  <input className="input" autoComplete="name" {...bind("name")} />
+                  {err("name")}
                 </div>
                 <div>
                   <label className="label" htmlFor="c-phone">Phone *</label>
-                  <input id="c-phone" className="input" required type="tel" autoComplete="tel" value={c.phone} onChange={set("phone")} />
+                  <input className="input" type="tel" inputMode="tel" autoComplete="tel" {...bind("phone")} />
+                  {err("phone")}
                 </div>
                 <div>
-                  <label className="label" htmlFor="c-email">Email</label>
-                  <input id="c-email" className="input" type="email" autoComplete="email" value={c.email} onChange={set("email")} />
+                  <label className="label" htmlFor="c-email">Email (optional)</label>
+                  <input className="input" type="email" autoComplete="email" {...bind("email")} />
+                  {err("email")}
                 </div>
                 <div>
                   <label className="label" htmlFor="c-city">City *</label>
-                  <input id="c-city" className="input" required autoComplete="address-level2" value={c.city} onChange={set("city")} />
+                  <input className="input" autoComplete="address-level2" {...bind("city")} />
+                  {err("city")}
                 </div>
               </div>
               <div>
-                <label className="label" htmlFor="c-addr">Address *</label>
-                <textarea id="c-addr" className="input" required rows={2} autoComplete="street-address" value={c.address} onChange={set("address")} />
+                <label className="label" htmlFor="c-address">Address *</label>
+                <textarea className="input" rows={2} autoComplete="street-address" {...bind("address")} />
+                {err("address")}
               </div>
               <div>
-                <label className="label" htmlFor="c-notes">Order notes</label>
-                <textarea id="c-notes" className="input" rows={2} value={c.notes} onChange={set("notes")} />
+                <label className="label" htmlFor="c-notes">Order notes (optional)</label>
+                <textarea className="input" rows={2} {...bind("notes")} />
               </div>
               <button className="btn !px-8">Continue to payment</button>
             </form>
@@ -176,7 +256,7 @@ export default function CheckoutPage() {
               <div className="grid gap-4 text-sm sm:grid-cols-2">
                 <div className="rounded-2xl bg-surface-alt p-4">
                   <div className="mb-1 flex items-center justify-between">
-                    <span className="font-bold">Deliver to</span>
+                    <span className="font-semibold">Deliver to</span>
                     <button className="link text-xs" onClick={() => setStep(0)}>Edit</button>
                   </div>
                   <p>{c.name}</p>
@@ -185,7 +265,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="rounded-2xl bg-surface-alt p-4">
                   <div className="mb-1 flex items-center justify-between">
-                    <span className="font-bold">Payment</span>
+                    <span className="font-semibold">Payment</span>
                     <button className="link text-xs" onClick={() => setStep(1)}>Edit</button>
                   </div>
                   <p>{method === "cod" ? "Cash on delivery" : "Bank transfer"}</p>
@@ -214,7 +294,7 @@ export default function CheckoutPage() {
                 <div className="relative h-12 w-12 shrink-0 rounded-xl bg-surface-alt">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {l.image && <img src={l.image} alt="" className="h-full w-full object-contain p-1" />}
-                  <span className="tabular absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--btn-bg)] px-1 text-[11px] font-bold text-[var(--btn-fg)]">{l.qty}</span>
+                  <span className="tabular absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--btn-bg)] px-1 text-xs font-semibold text-[var(--btn-fg)]">{l.qty}</span>
                 </div>
                 <span className="min-w-0 flex-1 truncate">{l.name}</span>
                 <span className="tabular">{formatPKR(l.price * l.qty)}</span>
@@ -231,7 +311,7 @@ export default function CheckoutPage() {
             <span className="tabular">{shipping === 0 ? "Free" : formatPKR(shipping)}</span>
           </div>
           {remaining > 0 && <p className="rounded-xl bg-accent p-2.5 text-xs">Add {formatPKR(remaining)} more for free shipping!</p>}
-          <div className="flex justify-between border-t border-line pt-3 text-lg font-bold">
+          <div className="flex justify-between border-t border-line pt-3 text-lg font-semibold">
             <span>Total</span>
             <span className="tabular">{formatPKR(subtotal + shipping)}</span>
           </div>

@@ -6,14 +6,14 @@ import { Order, type IOrder } from "@/lib/models/Order";
 import { getSettings } from "@/lib/models/Settings";
 import { formatPKR } from "@/lib/pricing";
 
-export const metadata = { title: "Order status" };
+export const metadata = { title: "Order status", robots: { index: false, follow: false } };
 
 const STEPS = ["pending", "confirmed", "shipped", "delivered"];
 
 export default async function OrderPage({ params }: PageProps<"/order/[number]">) {
   const { number } = await params;
   await connectDB();
-  const doc = await Order.findOne({ orderNumber: number }).lean();
+  const doc = await Order.findOne({ orderNumber: decodeURIComponent(number).toUpperCase().slice(0, 40) }).lean();
   if (!doc) notFound();
   const o = plain<IOrder>(doc);
   const settings = await getSettings();
@@ -28,7 +28,7 @@ export default async function OrderPage({ params }: PageProps<"/order/[number]">
         </span>
         <h1 className="text-3xl">{cancelled ? "Order cancelled" : "Thank you for your order!"}</h1>
         <p className="mt-2 text-muted">
-          Order number: <span className="font-mono font-bold text-fg">{o.orderNumber}</span>
+          Order number: <span className="font-mono font-semibold text-fg">{o.orderNumber}</span>
         </p>
         <p className="text-xs text-muted">Save this number to track your order.</p>
       </div>
@@ -47,7 +47,7 @@ export default async function OrderPage({ params }: PageProps<"/order/[number]">
         <div className="mb-6 rounded-2xl border border-warning/50 bg-warning/10 p-4 text-sm">
           <p className="font-semibold">Awaiting bank transfer verification</p>
           {settings.bankDetails && <p className="mt-1 whitespace-pre-line">{settings.bankDetails}</p>}
-          <p className="mt-1 text-muted">Reference given: {o.paymentReference}</p>
+          <p className="mt-1 text-muted">Reference given: ••••{o.paymentReference?.slice(-4)}</p>
         </div>
       )}
 
@@ -72,7 +72,7 @@ export default async function OrderPage({ params }: PageProps<"/order/[number]">
           <span className="text-muted">Shipping</span>
           <span className="tabular">{o.shipping === 0 ? "Free" : formatPKR(o.shipping)}</span>
         </div>
-        <div className="flex justify-between p-4 text-lg font-bold">
+        <div className="flex justify-between p-4 text-lg font-semibold">
           <span>
             Total <span className="text-sm font-normal text-muted">({o.paymentMethod === "cod" ? "cash on delivery" : o.paymentStatus})</span>
           </span>

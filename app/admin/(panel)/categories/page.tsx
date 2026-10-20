@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, Check, ErrorMsg, Field, ImageUpload, PageHeader } from "@/components/admin/ui";
 import { Icon, ICON_NAMES } from "@/components/Icon";
@@ -8,6 +9,7 @@ type Cat = { _id: string; name: string; slug: string; parent: string | null; ima
 const empty = { name: "", parent: "", image: "", icon: "", order: "0", active: true, featured: false };
 
 export default function CategoriesAdmin() {
+  const confirm = useConfirm();
   const [cats, setCats] = useState<Cat[]>([]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState(empty);
@@ -32,7 +34,7 @@ export default function CategoriesAdmin() {
   }
 
   async function remove(c: Cat) {
-    if (!confirm(`Delete "${c.name}"?`)) return;
+    if (!(await confirm({ title: `Delete "${c.name}"?`, message: "Categories that still have products or sub-categories can't be deleted.", confirmLabel: "Delete category", tone: "danger" }))) return;
     try {
       await adminFetch(`/api/admin/categories/${c._id}`, "DELETE");
       setError("");
@@ -44,7 +46,7 @@ export default function CategoriesAdmin() {
 
   // Render as an indented tree.
   const rows: { c: Cat; depth: number }[] = [];
-  const walk = (parent: string | null, depth: number) => cats.filter((c) => c.parent === parent).forEach((c) => (rows.push({ c, depth }), walk(c._id, depth + 1)));
+  const walk = (parent: string | null, depth: number) => cats.filter((c) => (c.parent ?? null) === parent).forEach((c) => (rows.push({ c, depth }), walk(c._id, depth + 1)));
   walk(null, 0);
 
   // A category can't be moved under itself or its own descendants.
@@ -97,7 +99,7 @@ export default function CategoriesAdmin() {
       <ErrorMsg msg={error} />
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+          <thead className="bg-surface-alt text-left text-xs uppercase text-muted">
             <tr><th className="p-3">Name</th><th>Order</th><th>Homepage</th><th>Active</th><th /></tr>
           </thead>
           <tbody>
@@ -106,14 +108,14 @@ export default function CategoriesAdmin() {
                 <td className="p-3 font-semibold" style={{ paddingLeft: 12 + depth * 24 }}>{depth > 0 && "└ "}{c.name}</td>
                 <td>{c.order}</td>
                 <td>{c.featured ? "✓" : ""}</td>
-                <td>{c.active ? "✓" : <span className="text-gray-400">hidden</span>}</td>
+                <td>{c.active ? "✓" : <span className="text-muted">hidden</span>}</td>
                 <td className="space-x-2 whitespace-nowrap p-3 text-right">
                   <button className="btn-outline !px-3 !py-1.5" onClick={() => { setForm({ name: c.name, parent: c.parent ?? "", image: c.image ?? "", icon: c.icon ?? "", order: String(c.order), active: c.active, featured: c.featured }); setEditing(c._id); setError(""); }}>Edit</button>
                   <button className="btn-danger" onClick={() => remove(c)}>Delete</button>
                 </td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-gray-500">No categories yet.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-muted">No categories yet.</td></tr>}
           </tbody>
         </table>
       </div>

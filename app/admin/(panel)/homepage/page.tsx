@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, Check, ErrorMsg, Field, fromLocalInput, ImageUpload, PageHeader, toLocalInput } from "@/components/admin/ui";
 import { useSettings } from "@/components/admin/useSettings";
@@ -17,6 +18,7 @@ const SECTION_NAMES: Record<string, string> = {
 };
 
 export default function HomepageAdmin() {
+  const confirm = useConfirm();
   const { settings: s, setSettings, save, error, saved } = useSettings();
   const [slides, setSlides] = useState<Slide[]>([]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
@@ -53,31 +55,31 @@ export default function HomepageAdmin() {
   return (
     <div className="max-w-3xl space-y-6">
       <PageHeader title="Homepage">
-        {saved && <span className="self-center text-sm font-semibold text-green-600">Saved ✓</span>}
+        {saved && <span className="self-center text-sm font-semibold text-ok-fg">Saved ✓</span>}
         <button className="btn" onClick={save}>Save sections & banner</button>
       </PageHeader>
       <ErrorMsg msg={error} />
 
       <section className="card space-y-4 p-5">
-        <h2 className="font-bold">Announcement bar</h2>
+        <h2 className="font-semibold">Announcement bar</h2>
         <Check label="Show announcement bar" checked={s.announcementEnabled} onChange={(v) => setSettings({ ...s, announcementEnabled: v })} />
         <Field label="Message"><input className="input" value={s.announcementText ?? ""} onChange={(e) => setSettings({ ...s, announcementText: e.target.value })} placeholder="Free shipping on orders over Rs. 5,000!" /></Field>
       </section>
 
       <section className="card space-y-3 p-5">
-        <h2 className="font-bold">Sections <span className="text-sm font-normal text-gray-400">(shown below the hero, in this order)</span></h2>
+        <h2 className="font-semibold">Sections <span className="text-sm font-normal text-muted">(shown below the hero, in this order)</span></h2>
         {s.homeSections.map((sec, i) => (
           <div key={sec.id} className="flex flex-wrap items-center gap-3 rounded-lg border p-3">
             <div className="flex flex-col">
-              <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="px-2 text-gray-500 disabled:opacity-20" aria-label="Move up">▲</button>
-              <button type="button" disabled={i === s.homeSections.length - 1} onClick={() => move(i, 1)} className="px-2 text-gray-500 disabled:opacity-20" aria-label="Move down">▼</button>
+              <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="px-2 text-muted disabled:opacity-20" aria-label="Move up">▲</button>
+              <button type="button" disabled={i === s.homeSections.length - 1} onClick={() => move(i, 1)} className="px-2 text-muted disabled:opacity-20" aria-label="Move down">▼</button>
             </div>
             <div className="min-w-40 text-sm font-semibold">{SECTION_NAMES[sec.id]}</div>
             <input className="input !w-56 flex-1" value={sec.title} onChange={(e) => patchSection(i, { title: e.target.value })} aria-label="Section title" />
             <Check label="Visible" checked={sec.enabled} onChange={(v) => patchSection(i, { enabled: v })} />
           </div>
         ))}
-        <p className="text-xs text-gray-500">Which products appear: tick “Featured” on products, “Show on homepage” on categories, and set a sale price on products. Sale items appear automatically while their sale is active.</p>
+        <p className="text-xs text-muted">Which products appear: tick “Featured” on products, “Show on homepage” on categories, and set a sale price on products. Sale items appear automatically while their sale is active.</p>
         <Field label="Sale countdown ends" hint="Optional. Shows a countdown beside the deals section until this time.">
           <div className="flex gap-2">
             <input className="input" type="datetime-local" value={toLocalInput(s.saleCountdownEnd)} onChange={(e) => setSettings({ ...s, saleCountdownEnd: fromLocalInput(e.target.value) })} />
@@ -115,13 +117,13 @@ export default function HomepageAdmin() {
                 <img src={sl.image} alt="" className="h-16 w-28 rounded object-cover" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold">{sl.headline}</div>
-                  <div className="text-xs text-gray-500">Order {sl.order} · {sl.active ? "Active" : "Hidden"}</div>
+                  <div className="text-xs text-muted">Order {sl.order} · {sl.active ? "Active" : "Hidden"}</div>
                 </div>
                 <button className="btn-outline !px-3 !py-1.5" onClick={() => { setForm({ image: sl.image, headline: sl.headline, subtext: sl.subtext ?? "", ctaLabel: sl.ctaLabel ?? "", ctaLink: sl.ctaLink ?? "", order: String(sl.order), active: sl.active }); setEditing(sl._id); setSlideError(""); }}>Edit</button>
-                <button className="btn-danger" onClick={async () => { if (confirm("Delete this slide?")) { await adminFetch(`/api/admin/hero/${sl._id}`, "DELETE"); load(); } }}>Delete</button>
+                <button className="btn-danger" onClick={async () => { if (await confirm({ title: `Delete the slide "${sl.headline}"?`, message: "It disappears from the homepage straight away.", confirmLabel: "Delete slide", tone: "danger" })) { await adminFetch(`/api/admin/hero/${sl._id}`, "DELETE").catch(() => {}); load(); } }}>Delete</button>
               </div>
             ))}
-            {slides.length === 0 && <div className="card p-8 text-center text-gray-500">No slides yet. The homepage shows a default banner until you add one.</div>}
+            {slides.length === 0 && <div className="card p-8 text-center text-muted">No slides yet. The homepage shows a default banner until you add one.</div>}
           </div>
         )}
       </section>

@@ -24,23 +24,23 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
 
       <main className="flex-1 pt-[var(--hdr-pad)]">{children}</main>
 
-      <footer className="mt-20 border-t border-line bg-surface-alt pb-28 md:pb-0">
-        <div className="container-x grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <footer className="mt-28 bg-[#06141b] pb-28 text-[#e6f4f2] md:pb-0">
+        <div className="container-x grid gap-10 py-16 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="space-y-3">
-            <Logo className="h-9" />
-            <p className="max-w-xs text-sm text-muted">Dental and oral-care essentials, delivered to your door.</p>
+            <Logo className="h-9" onDark />
+            <p className="max-w-xs text-sm text-[#9db9bf]">Dental and oral-care essentials, delivered to your door.</p>
           </div>
           <div>
-            <h3 className="mb-3 text-sm uppercase tracking-wide text-muted">Shop</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.1em] text-[#9db9bf]">Shop</h3>
+            <ul className="text-sm">
               <li>
-                <Link href="/shop" className="hover:text-link">
+                <Link href="/shop" className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-[#4fd3c4]">
                   All products
                 </Link>
               </li>
               {roots.map((c) => (
                 <li key={c._id}>
-                  <Link href={`/category/${c.slug}`} className="hover:text-link">
+                  <Link href={`/category/${c.slug}`} className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-[#4fd3c4]">
                     {c.name}
                   </Link>
                 </li>
@@ -48,41 +48,41 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
             </ul>
           </div>
           <div>
-            <h3 className="mb-3 text-sm uppercase tracking-wide text-muted">Help</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.1em] text-[#9db9bf]">Help</h3>
+            <ul className="text-sm">
               <li>
-                <Link href="/track" className="hover:text-link">
+                <Link href="/track" className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-[#4fd3c4]">
                   Track your order
                 </Link>
               </li>
               <li>
-                <Link href="/wishlist" className="hover:text-link">
+                <Link href="/wishlist" className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-[#4fd3c4]">
                   Wishlist
                 </Link>
               </li>
               <li>
-                <Link href="/cart" className="hover:text-link">
+                <Link href="/cart" className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-[#4fd3c4]">
                   Cart
                 </Link>
               </li>
             </ul>
           </div>
           <div>
-            <h3 className="mb-3 text-sm uppercase tracking-wide text-muted">Contact</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="mb-3 font-sans text-xs font-semibold uppercase tracking-[0.1em] text-[#9db9bf]">Contact</h3>
+            <ul className="text-sm">
               {settings.contactPhone && <li>{settings.contactPhone}</li>}
               {settings.contactEmail && (
                 <li>
-                  <a href={`mailto:${settings.contactEmail}`} className="hover:text-link">
+                  <a href={`mailto:${settings.contactEmail}`} className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-[#4fd3c4]">
                     {settings.contactEmail}
                   </a>
                 </li>
               )}
-              {!settings.contactPhone && !settings.contactEmail && <li className="text-muted">Add contact details in admin settings.</li>}
+              {!settings.contactPhone && !settings.contactEmail && <li className="text-[#9db9bf]">Add contact details in admin settings.</li>}
             </ul>
           </div>
         </div>
-        <div className="border-t border-line py-5 text-center text-xs text-muted">
+        <div className="container-x border-t border-[#1e3c4b] py-5 text-xs text-[#9db9bf]">
           © {new Date().getFullYear()} {settings.storeName}. All rights reserved.
         </div>
       </footer>

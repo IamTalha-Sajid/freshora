@@ -13,7 +13,7 @@ import type { PCategory, PProduct } from "@/lib/data";
 
 /** Everything that floats over the page: header, bottom nav, drawers, toasts. */
 export function StoreChrome({ categories, shipping, upsell, announcement }: { categories: PCategory[]; shipping: ShippingInfo; upsell: PProduct[]; announcement: boolean }) {
-  const { sheet, closeSheet, toasts } = useStore();
+  const { sheet, closeSheet } = useStore();
   const roots = categories.filter((c) => !c.parent);
 
   return (
@@ -65,17 +65,6 @@ export function StoreChrome({ categories, shipping, upsell, announcement }: { ca
           <SearchBox autoFocus onDone={closeSheet} />
         </div>
       </Drawer>
-
-      <div className="pointer-events-none fixed inset-x-0 bottom-24 z-[70] flex flex-col items-center gap-2 px-4 md:bottom-6" aria-live="polite">
-        {toasts.map((t) => (
-          <div key={t.id} className="glass-strong pointer-events-auto flex animate-rise items-center gap-2 rounded-full py-2.5 pl-3 pr-5 text-sm font-semibold">
-            <span className={`flex h-6 w-6 items-center justify-center rounded-full ${t.tone === "error" ? "bg-danger text-white" : "bg-mint text-[#06141b]"}`}>
-              <Icon name={t.tone === "error" ? "close" : "check"} size={14} />
-            </span>
-            {t.message}
-          </div>
-        ))}
-      </div>
     </>
   );
 }

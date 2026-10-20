@@ -57,7 +57,7 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
             )}
           </p>
           <div className="h-2 overflow-hidden rounded-full bg-accent" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Progress to free shipping">
-            <div className="h-full rounded-full bg-gradient-to-r from-teal to-mint transition-[width] duration-500" style={{ width: `${pct}%` }} />
+            <div className="h-full w-full origin-left rounded-full bg-teal transition-transform duration-300" style={{ transform: `scaleX(${pct / 100})` }} />
           </div>
         </div>
       )}
@@ -67,7 +67,7 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-accent text-link">
             <Icon name="cart" size={28} />
           </span>
-          <p className="font-display text-lg font-bold">Your cart is empty</p>
+          <p className="font-display text-lg font-semibold">Your cart is empty</p>
           <p className="text-sm text-muted">Fresh finds are waiting.</p>
           <Link href="/shop" onClick={closeSheet} className="btn mt-2">
             Start shopping
@@ -109,7 +109,7 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
 
           {suggestions.length > 0 && (
             <div className="border-t border-line/70 px-5 py-4">
-              <p className="mb-3 text-sm font-bold">Complete your routine</p>
+              <p className="mb-3 text-sm font-semibold">Complete your routine</p>
               <ul className="space-y-3">
                 {suggestions.map((p) => (
                   <li key={p._id} className="flex items-center gap-3">

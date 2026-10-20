@@ -25,7 +25,7 @@ export function ProductActions({ id, slug, name, price, image, stock }: Props) {
   }, []);
 
   if (stock <= 0) return <div className="rounded-2xl bg-danger/10 px-4 py-3 text-sm font-semibold text-danger-fg">Out of stock</div>;
-  const add = (n = qty) => addToCart({ kind: "product", id, slug, name, price, image }, n);
+  const add = (n = qty) => addToCart({ kind: "product", id, slug, name, price, image, stock }, n);
 
   return (
     <>

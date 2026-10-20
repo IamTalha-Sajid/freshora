@@ -29,7 +29,7 @@ export default function TrackPage() {
         <p className="text-sm text-muted">Enter the order number from your confirmation and the phone number you used at checkout.</p>
         <div>
           <label className="label" htmlFor="t-num">Order number</label>
-          <input id="t-num" className="input font-mono" required value={number} onChange={(e) => setNumber(e.target.value)} placeholder="FR-XXXXXXXX" />
+          <input id="t-num" className="input font-mono" required value={number} onChange={(e) => setNumber(e.target.value)} placeholder="FR-XXXX-XXXX-XXXX" />
         </div>
         <div>
           <label className="label" htmlFor="t-phone">Phone</label>

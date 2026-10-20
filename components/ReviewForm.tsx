@@ -35,7 +35,7 @@ export function ReviewForm({ productId }: { productId: string }) {
       </div>
       <div className="flex gap-0.5" role="radiogroup" aria-label="Rating">
         {[1, 2, 3, 4, 5].map((n) => (
-          <button type="button" key={n} role="radio" aria-checked={n === form.rating} aria-label={`${n} star${n > 1 ? "s" : ""}`} onClick={() => setForm({ ...form, rating: n })} className={`flex h-11 w-9 items-center justify-center ${n <= form.rating ? "text-warning" : "text-line"}`}>
+          <button type="button" key={n} role="radio" aria-checked={n === form.rating} aria-label={`${n} star${n > 1 ? "s" : ""}`} onClick={() => setForm({ ...form, rating: n })} className={`flex h-11 w-11 items-center justify-center ${n <= form.rating ? "text-warning" : "text-line"}`}>
             <Icon name="star" size={26} fill="currentColor" />
           </button>
         ))}
@@ -43,7 +43,7 @@ export function ReviewForm({ productId }: { productId: string }) {
       <textarea className="input" aria-label="Your review" rows={3} placeholder="Share your experience" required value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
       {error && <p className="text-sm text-danger-fg">{error}</p>}
       <button className="btn" disabled={state === "sending"}>
-        {state === "sending" ? "Sending…" : "Submit review"}
+        {state === "sending" ? "Posting…" : "Post review"}
       </button>
     </form>
   );

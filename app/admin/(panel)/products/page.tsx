@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, Check, ErrorMsg, Field, fromLocalInput, ImageUpload, PageHeader, toLocalInput } from "@/components/admin/ui";
 import { formatPKR, isOnSale } from "@/lib/pricing";
@@ -38,12 +39,14 @@ type Form = {
   lowStockThreshold: string; seoTitle: string; seoDescription: string; featured: boolean; active: boolean;
   salePrice: string; saleStart: string; saleEnd: string;
   ingredients: string; howToUse: string; faq: { q: string; a: string }[];
+  /** Stock when the form was opened; the server applies the edit as a change against it. */
+  stockBase: string;
 };
 
 const empty: Form = {
   name: "", price: "", category: "", images: [], stock: "0", sku: "", shortDescription: "", description: "", compareAtPrice: "", weight: "", tags: "",
   lowStockThreshold: "", seoTitle: "", seoDescription: "", featured: false, active: true, salePrice: "", saleStart: "", saleEnd: "",
-  ingredients: "", howToUse: "", faq: [],
+  ingredients: "", howToUse: "", faq: [], stockBase: "",
 };
 
 const s = (v: unknown) => (v == null ? "" : String(v));
@@ -55,11 +58,12 @@ function toForm(p: Product): Form {
     shortDescription: s(p.shortDescription), description: s(p.description), compareAtPrice: s(p.compareAtPrice), weight: s(p.weight),
     tags: p.tags.join(", "), lowStockThreshold: s(p.lowStockThreshold), seoTitle: s(p.seoTitle), seoDescription: s(p.seoDescription),
     featured: p.featured, active: p.active, salePrice: s(p.salePrice), saleStart: toLocalInput(p.saleStart), saleEnd: toLocalInput(p.saleEnd),
-    ingredients: s(p.ingredients), howToUse: s(p.howToUse), faq: p.faq ?? [],
+    ingredients: s(p.ingredients), howToUse: s(p.howToUse), faq: p.faq ?? [], stockBase: s(p.stock),
   };
 }
 
 export default function ProductsAdmin() {
+  const confirm = useConfirm();
   const [products, setProducts] = useState<Product[]>([]);
   const [cats, setCats] = useState<Cat[]>([]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
@@ -111,7 +115,7 @@ export default function ProductsAdmin() {
   }
 
   async function remove(p: Product) {
-    if (!confirm(`Delete "${p.name}"? Existing orders keep their snapshot.`)) return;
+    if (!(await confirm({ title: `Delete "${p.name}"?`, message: "Its reviews are deleted and it is removed from any bundle. Existing orders keep their copy of the product.", confirmLabel: "Delete product", tone: "danger" }))) return;
     await adminFetch(`/api/admin/products/${p._id}`, "DELETE").catch((e) => setError(e.message));
     await load();
   }
@@ -126,7 +130,7 @@ export default function ProductsAdmin() {
         <ErrorMsg msg={error} />
 
         <section className="card space-y-4 p-5">
-          <h2 className="font-bold">Required</h2>
+          <h2 className="font-semibold">Required</h2>
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Name *"><input required {...text("name")} /></Field>
             <Field label="Category *">
@@ -144,7 +148,7 @@ export default function ProductsAdmin() {
         </section>
 
         <section className="card space-y-4 p-5">
-          <h2 className="font-bold">Sale <span className="text-sm font-normal text-gray-400">(optional, leave dates empty for an open-ended sale)</span></h2>
+          <h2 className="font-semibold">Sale <span className="text-sm font-normal text-muted">(optional, leave dates empty for an open-ended sale)</span></h2>
           <div className="grid gap-4 md:grid-cols-3">
             <Field label="Sale price"><input type="number" min={0} step="any" {...text("salePrice")} /></Field>
             <Field label="Starts"><input type="datetime-local" {...text("saleStart")} /></Field>
@@ -153,7 +157,7 @@ export default function ProductsAdmin() {
         </section>
 
         <section className="card space-y-4 p-5">
-          <h2 className="font-bold">Optional details</h2>
+          <h2 className="font-semibold">Optional details</h2>
           <div className="grid gap-4 md:grid-cols-3">
             <Field label="SKU"><input {...text("sku")} /></Field>
             <Field label="Compare-at price"><input type="number" min={0} step="any" {...text("compareAtPrice")} /></Field>
@@ -203,7 +207,7 @@ export default function ProductsAdmin() {
       <ErrorMsg msg={error} />
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+          <thead className="bg-surface-alt text-left text-xs uppercase text-muted">
             <tr><th className="p-3">Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Featured</th><th>Active</th><th /></tr>
           </thead>
           <tbody>
@@ -215,16 +219,16 @@ export default function ProductsAdmin() {
                     <img src={p.images[0]} alt="" className="h-10 w-10 rounded object-cover" />
                     <div>
                       <div className="font-semibold">{p.name}</div>
-                      {p.sku && <div className="text-xs text-gray-400">{p.sku}</div>}
+                      {p.sku && <div className="text-xs text-muted">{p.sku}</div>}
                     </div>
                   </div>
                 </td>
                 <td>{typeof p.category === "object" ? p.category?.name : ""}</td>
                 <td>
                   {formatPKR(p.price)}
-                  {isOnSale(p) && <span className="ml-1 rounded bg-red-100 px-1 text-xs text-red-600">Sale {formatPKR(p.salePrice as number)}</span>}
+                  {isOnSale(p) && <span className="ml-1 rounded bg-danger/10 px-1 text-xs text-danger-fg">Sale {formatPKR(p.salePrice as number)}</span>}
                 </td>
-                <td className={p.stock === 0 ? "font-semibold text-red-600" : p.stock <= (p.lowStockThreshold ?? 5) ? "font-semibold text-amber-600" : ""}>{p.stock}</td>
+                <td className={p.stock === 0 ? "font-semibold text-danger-fg" : p.stock <= (p.lowStockThreshold ?? 5) ? "font-semibold text-warn-fg" : ""}>{p.stock}</td>
                 <td><input type="checkbox" checked={p.featured} onChange={(e) => quick(p, { featured: e.target.checked })} aria-label="Featured" /></td>
                 <td><input type="checkbox" checked={p.active} onChange={(e) => quick(p, { active: e.target.checked })} aria-label="Active" /></td>
                 <td className="space-x-2 whitespace-nowrap p-3 text-right">
@@ -233,7 +237,7 @@ export default function ProductsAdmin() {
                 </td>
               </tr>
             ))}
-            {shown.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-gray-500">No products yet.</td></tr>}
+            {shown.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted">No products yet.</td></tr>}
           </tbody>
         </table>
       </div>

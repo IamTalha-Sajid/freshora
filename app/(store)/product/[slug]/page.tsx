@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<"/product/[slug]">)
 function Accordion({ title, children, open = false }: { title: string; children: React.ReactNode; open?: boolean }) {
   return (
     <details open={open} className="group border-b border-line py-1">
-      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between font-display text-lg font-bold [&::-webkit-details-marker]:hidden">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between font-display text-lg font-semibold [&::-webkit-details-marker]:hidden">
         {title}
         <Icon name="chevron-down" className="transition group-open:rotate-180" />
       </summary>
@@ -37,13 +37,13 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
   return (
     <div className="container-x py-8">
       <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted">
-        <Link href="/" className="hover:text-link">Home</Link> / <Link href="/shop" className="hover:text-link">Shop</Link> / <span className="text-fg">{p.name}</span>
+        <Link href="/" className="-mx-2 -my-3 inline-block px-2 py-3 hover:text-link">Home</Link> / <Link href="/shop" className="-mx-2 -my-3 inline-block px-2 py-3 hover:text-link">Shop</Link> / <span className="text-fg">{p.name}</span>
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
         <Gallery images={p.images} alt={p.name} />
         <div className="space-y-5">
-          <h1 className="text-3xl sm:text-4xl">{p.name}</h1>
+          <h1 className="title-page">{p.name}</h1>
           {p.ratingCount > 0 && (
             <a href="#reviews" className="inline-flex items-center gap-1.5 text-sm">
               <Icon name="star" size={18} className="text-warning" fill="currentColor" />
@@ -54,7 +54,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
             </a>
           )}
           <div className="flex flex-wrap items-baseline gap-3">
-            <span className={`tabular font-display text-3xl font-bold ${sale ? "text-danger-fg" : ""}`}>{formatPKR(price)}</span>
+            <span className={`tabular font-display text-3xl font-semibold ${sale ? "text-danger-fg" : ""}`}>{formatPKR(price)}</span>
             {sale && <span className="tabular text-lg text-muted line-through">{formatPKR(p.price)}</span>}
             {sale && <span className="chip-sale">Save {Math.round((1 - price / p.price) * 100)}%</span>}
           </div>

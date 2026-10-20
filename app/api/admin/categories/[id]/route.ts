@@ -1,10 +1,11 @@
 import { api, HttpError } from "@/lib/api";
+import { categoryRules } from "@/lib/category-rules";
 import { crud } from "@/lib/crud";
 import { Category } from "@/lib/models/Category";
 import { Product } from "@/lib/models/Product";
 import { categorySchema } from "@/lib/schemas";
 
-const c = crud({ model: Category, schema: categorySchema });
+const c = crud({ model: Category, schema: categorySchema, validate: categoryRules });
 export const PUT = c.update;
 
 export const DELETE = api<{ params: Promise<{ id: string }> }>(

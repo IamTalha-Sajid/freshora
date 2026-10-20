@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
+import { Tip } from "@/components/Tooltip";
 import { PopButton } from "@/components/PopButton";
 import { useStore } from "@/components/StoreProvider";
 import type { PProduct } from "@/lib/data";
@@ -12,16 +13,19 @@ import { effectivePrice, formatPKR, isOnSale } from "@/lib/pricing";
 export function WishlistButton({ id, className = "" }: { id: string; className?: string }) {
   const { wishlist, toggleWishlist } = useStore();
   const on = wishlist.includes(id);
+  const label = on ? "Remove from wishlist" : "Add to wishlist";
   return (
+    <Tip label={label} side="left">
     <button
       type="button"
-      aria-label={on ? "Remove from wishlist" : "Add to wishlist"}
+      aria-label={label}
       aria-pressed={on}
       onClick={() => toggleWishlist(id)}
       className={`flex h-11 w-11 items-center justify-center rounded-full bg-surface/85 shadow-sm backdrop-blur transition hover:bg-surface ${on ? "text-danger" : "text-muted hover:text-fg"} ${className}`}
     >
       <Icon name="heart" size={20} fill={on ? "currentColor" : "none"} />
     </button>
+    </Tip>
   );
 }
 
@@ -39,8 +43,8 @@ function Rating({ p }: { p: PProduct }) {
 function Price({ p, large = false }: { p: PProduct; large?: boolean }) {
   const sale = isOnSale(p);
   return (
-    <div className="flex items-baseline gap-2">
-      <span className={`tabular font-bold ${large ? "text-xl" : "text-base"} ${sale ? "text-danger-fg" : ""}`}>{formatPKR(effectivePrice(p))}</span>
+    <div className="flex flex-wrap items-baseline gap-x-2">
+      <span className={`tabular whitespace-nowrap font-display font-semibold ${large ? "text-2xl" : "text-xl"} ${sale ? "text-danger-fg" : ""}`}>{formatPKR(effectivePrice(p))}</span>
       {sale && <span className="tabular text-xs text-muted line-through">{formatPKR(p.price)}</span>}
     </div>
   );
@@ -53,13 +57,13 @@ export function ProductCard({ p, layout = "grid" }: { p: PProduct; layout?: "gri
   const price = effectivePrice(p);
   const out = p.stock <= 0;
   const low = !out && p.stock <= (p.lowStockThreshold ?? 5);
-  const add = () => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price, image: p.images[0] });
+  const add = () => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price, image: p.images[0], stock: p.stock });
   const list = layout === "list";
 
   return (
     <>
-      <article className={`card card-hover group relative overflow-hidden ${list ? "flex gap-4 p-3 sm:gap-6 sm:p-4" : "flex h-full flex-col"}`}>
-        <Link href={`/product/${p.slug}`} className={`relative block shrink-0 overflow-hidden bg-surface-alt ${list ? "h-32 w-32 rounded-xl sm:h-44 sm:w-44" : "aspect-square"}`} aria-label={p.name}>
+      <article className={`card card-hover group @container relative overflow-hidden ${list ? "flex gap-4 p-3 sm:gap-6 sm:p-4" : "flex h-full flex-col p-2.5"}`}>
+        <Link href={`/product/${p.slug}`} className={`relative block shrink-0 overflow-hidden bg-surface-alt ${list ? "h-32 w-32 rounded-2xl sm:h-44 sm:w-44" : "aspect-square rounded-[18px]"}`} aria-label={p.name}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={p.images[0]} alt="" className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105" loading="lazy" />
           <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1">
@@ -68,7 +72,7 @@ export function ProductCard({ p, layout = "grid" }: { p: PProduct; layout?: "gri
           </div>
           {out && <span className="absolute inset-x-0 bottom-0 bg-[#06141b]/70 py-1.5 text-center text-xs font-semibold text-white">Out of stock</span>}
         </Link>
-        <div className={`absolute flex flex-col gap-1 ${list ? "right-3 top-3" : "right-2.5 top-2.5"}`}>
+        <div className={`absolute flex flex-col gap-1 ${list ? "right-3 top-3" : "right-5 top-5"}`}>
           <WishlistButton id={p._id} />
           <button
             type="button"
@@ -80,24 +84,24 @@ export function ProductCard({ p, layout = "grid" }: { p: PProduct; layout?: "gri
           </button>
         </div>
 
-        <div className={`flex flex-1 flex-col gap-1.5 ${list ? "py-1 pr-10" : "p-4"}`}>
+        <div className={`flex flex-1 flex-col gap-1.5 ${list ? "py-1 pr-10" : "px-2 pb-1.5 pt-3.5"}`}>
           <Rating p={p} />
-          <Link href={`/product/${p.slug}`} className="line-clamp-2 font-semibold leading-snug hover:text-link">
-            {p.name}
+          <Link href={`/product/${p.slug}`} className="-my-3 block py-3 font-semibold leading-snug hover:text-link">
+            <span className="line-clamp-2">{p.name}</span>
           </Link>
           {list && p.shortDescription && <p className="line-clamp-2 hidden text-sm text-muted sm:block">{p.shortDescription}</p>}
-          <div className={`mt-auto pt-2 ${list ? "flex items-end justify-between gap-2" : "flex flex-col gap-3"}`}>
+          <div className={`mt-auto pt-2 flex flex-col gap-3 @[15rem]:flex-row @[15rem]:items-center @[15rem]:justify-between`}>
             <Price p={p} />
-            <PopButton className={`btn !min-h-11 !px-4 ${list ? "" : "w-full"}`} disabled={out} onClick={add} aria-label={`Add ${p.name} to cart`}>
+            <PopButton className="btn !min-h-11 w-full !px-4 @[15rem]:w-auto" disabled={out} onClick={add} aria-label={`Add ${p.name} to cart`}>
               <Icon name="plus" size={16} /> {out ? "Sold out" : "Add"}
             </PopButton>
           </div>
         </div>
       </article>
 
-      <Drawer open={quick} onClose={() => setQuick(false)} side="center" title="Quick view" width="max-w-3xl">
-        <div className="grid gap-6 p-5 md:grid-cols-2">
-          <div className="aspect-square overflow-hidden rounded-2xl bg-surface-alt">
+      <Drawer open={quick} onClose={() => setQuick(false)} side="right" title="Quick view" width="max-w-md">
+        <div className="grid gap-6 p-5">
+          <div className="aspect-square overflow-hidden rounded-3xl bg-surface-alt">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={p.images[0]} alt={p.name} className="h-full w-full object-contain p-4" />
           </div>

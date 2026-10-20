@@ -20,6 +20,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // One-off Node script (CommonJS)
     "scripts/build-brand-assets.js",
+    // Design handoff files, not app code
+    "v2-redesign/**",
   ]),
 ]);
 

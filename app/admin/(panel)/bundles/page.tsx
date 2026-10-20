@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, Check, ErrorMsg, Field, ImageUpload, PageHeader } from "@/components/admin/ui";
 import { formatPKR } from "@/lib/pricing";
@@ -10,6 +11,7 @@ type Form = { name: string; image: string; price: string; active: boolean; items
 const empty: Form = { name: "", image: "", price: "", active: true, items: [{ product: "", qty: 1 }] };
 
 export default function BundlesAdmin() {
+  const confirm = useConfirm();
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [products, setProducts] = useState<Prod[]>([]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
@@ -85,21 +87,21 @@ export default function BundlesAdmin() {
       <ErrorMsg msg={error} />
       <div className="card overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500"><tr><th className="p-3">Bundle</th><th>Contents</th><th>Price</th><th>Active</th><th /></tr></thead>
+          <thead className="bg-surface-alt text-left text-xs uppercase text-muted"><tr><th className="p-3">Bundle</th><th>Contents</th><th>Price</th><th>Active</th><th /></tr></thead>
           <tbody>
             {bundles.map((b) => (
               <tr key={b._id} className="border-t">
                 <td className="p-3 font-semibold">{b.name}</td>
-                <td className="text-gray-600">{b.items.map((i) => `${i.qty}× ${i.product?.name ?? "(deleted)"}`).join(", ")}</td>
+                <td className="text-muted">{b.items.map((i) => `${i.qty}× ${i.product?.name ?? "(deleted)"}`).join(", ")}</td>
                 <td>{formatPKR(b.price)}</td>
                 <td>{b.active ? "✓" : ""}</td>
                 <td className="space-x-2 whitespace-nowrap p-3 text-right">
                   <button className="btn-outline !px-3 !py-1.5" onClick={() => { setForm({ name: b.name, image: b.image ?? "", price: String(b.price), active: b.active, items: b.items.filter((i) => i.product).map((i) => ({ product: i.product!._id, qty: i.qty })) }); setEditing(b._id); setError(""); }}>Edit</button>
-                  <button className="btn-danger" onClick={async () => { if (confirm(`Delete "${b.name}"?`)) { await adminFetch(`/api/admin/bundles/${b._id}`, "DELETE"); load(); } }}>Delete</button>
+                  <button className="btn-danger" onClick={async () => { if (await confirm({ title: `Delete "${b.name}"?`, message: "Customers will no longer see this bundle. Past orders are not affected.", confirmLabel: "Delete bundle", tone: "danger" })) { await adminFetch(`/api/admin/bundles/${b._id}`, "DELETE").catch(() => {}); load(); } }}>Delete</button>
                 </td>
               </tr>
             ))}
-            {bundles.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-gray-500">No bundles yet.</td></tr>}
+            {bundles.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-muted">No bundles yet.</td></tr>}
           </tbody>
         </table>
       </div>

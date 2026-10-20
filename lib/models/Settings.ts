@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Schema, type Model } from "mongoose";
 import { defineModel } from "@/lib/define-model";
 import { connectDB } from "@/lib/db";
@@ -56,13 +57,16 @@ const SettingsSchema = new Schema<ISettings>({
 
 export const Settings: Model<ISettings> = defineModel<ISettings>("Settings", SettingsSchema);
 
-export async function getSettings() {
+// Read-only on the hot path (only the very first call creates the document), and de-duplicated per request.
+export const getSettings = cache(async () => {
   await connectDB();
-  const doc = await Settings.findOneAndUpdate({ key: "main" }, { $setOnInsert: { key: "main" } }, { upsert: true, returnDocument: "after" }).lean();
+  const doc =
+    (await Settings.findOne({ key: "main" }).lean()) ??
+    (await Settings.findOneAndUpdate({ key: "main" }, { $setOnInsert: { key: "main" } }, { upsert: true, returnDocument: "after" }).lean());
   const s = JSON.parse(JSON.stringify(doc)) as ISettings;
   // Older stores saved before new sections existed: append whatever is missing.
   const have = new Set(s.homeSections.map((x) => x.id));
   s.homeSections = [...s.homeSections, ...DEFAULT_SECTIONS.filter((d) => !have.has(d.id))];
   s.trustItems ??= [];
   return s;
-}
+});

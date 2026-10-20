@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/Brand";
 import { LogoutButton } from "@/components/admin/LogoutButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata = { title: "Admin", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -16,14 +17,17 @@ const NAV = [
   ["/admin/settings", "Settings"],
 ];
 
-// The admin panel stays in light mode regardless of the storefront theme.
+// The admin follows the visitor's theme (toggle in the sidebar header).
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
-    <div data-theme="light" className="flex min-h-screen flex-col bg-page text-fg md:flex-row">
+    <div className="flex min-h-screen flex-col bg-page text-fg md:flex-row">
       <aside className="shrink-0 border-b border-line bg-surface md:w-60 md:border-b-0 md:border-r">
         <div className="flex items-center gap-2 px-4 py-4">
-          <Logo href="/admin" lightOnly className="h-8" />
+          <Logo href="/admin" className="h-8" />
           <span className="chip">Admin</span>
+          <span className="ml-auto">
+            <ThemeToggle />
+          </span>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-col md:pb-0">
           {NAV.map(([href, label]) => (

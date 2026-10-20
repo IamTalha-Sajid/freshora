@@ -21,15 +21,19 @@ export default function WishlistPage() {
 
   return (
     <div className="container-x py-8">
-      <h1 className="mb-6 text-3xl sm:text-4xl">Wishlist</h1>
+      <h1 className="mb-6 title-page">Wishlist</h1>
       {products === null ? (
-        <p>Loading…</p>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4" aria-busy="true" aria-label="Loading wishlist">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="skeleton h-72" />
+          ))}
+        </div>
       ) : products.length === 0 ? (
         <div className="card flex flex-col items-center gap-3 p-12 text-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-link">
             <Icon name="heart" size={26} />
           </span>
-          <p className="font-display text-lg font-bold">Nothing saved yet</p>
+          <p className="font-display text-lg font-semibold">Nothing saved yet</p>
           <Link href="/shop" className="btn">
             Browse products
           </Link>

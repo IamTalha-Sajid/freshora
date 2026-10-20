@@ -8,7 +8,7 @@ import { useStore } from "@/components/StoreProvider";
 export function BottomNav() {
   const pathname = usePathname();
   const { cartCount, ready, openSheet, sheet } = useStore();
-  const item = "relative flex min-h-[52px] flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-[11px] font-semibold transition";
+  const item = "relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs font-semibold transition";
   const on = (active: boolean) => (active ? "text-link" : "text-muted");
 
   return (
@@ -26,7 +26,7 @@ export function BottomNav() {
         <span className="relative">
           <Icon name="cart" />
           {ready && cartCount > 0 && (
-            <span key={cartCount} className="absolute -right-2.5 -top-2 flex h-4 min-w-4 animate-bounce-once items-center justify-center rounded-full bg-mint px-1 text-[10px] font-bold text-[#06141b]">
+            <span key={cartCount} className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-mint px-1 text-xs font-semibold text-[#06141b]">
               {cartCount}
             </span>
           )}

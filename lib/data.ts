@@ -28,7 +28,15 @@ export async function getCategories(): Promise<PCategory[]> {
 /** A category id plus all of its descendants. */
 export function descendantIds(all: PCategory[], rootId: string) {
   const ids = [rootId];
-  for (let i = 0; i < ids.length; i++) for (const c of all) if (c.parent === ids[i]) ids.push(c._id);
+  const seen = new Set(ids); // guards against a corrupt parent loop
+  for (let i = 0; i < ids.length; i++) {
+    for (const c of all) {
+      if (c.parent === ids[i] && !seen.has(c._id)) {
+        seen.add(c._id);
+        ids.push(c._id);
+      }
+    }
+  }
   return ids;
 }
 
@@ -113,6 +121,15 @@ export async function getLatestReviews(limit = 6): Promise<LatestReview[]> {
   await connectDB();
   const rows = await Review.find({ approved: true }).sort({ createdAt: -1 }).limit(limit).populate("product", "name slug").lean();
   return plain(rows);
+}
+
+export async function getReviewStats(): Promise<{ count: number; average: number }> {
+  await connectDB();
+  const [row] = await Review.aggregate<{ count: number; average: number }>([
+    { $match: { approved: true } },
+    { $group: { _id: null, count: { $sum: 1 }, average: { $avg: "$rating" } } },
+  ]);
+  return row ? { count: row.count, average: Math.round(row.average * 10) / 10 } : { count: 0, average: 0 };
 }
 
 export async function getApprovedReviews(productId: string) {

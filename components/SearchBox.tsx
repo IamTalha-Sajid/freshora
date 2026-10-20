@@ -55,14 +55,14 @@ export function SearchBox({ tone = "default", autoFocus = false, onDone, classNa
 
   const field =
     tone === "on-hero"
-      ? "border-white/30 bg-white/15 text-white placeholder:text-white/75 focus:border-white/70"
+      ? "border-white/20 bg-[#06141b]/25 text-white placeholder:text-white/70 focus:border-mint"
       : "border-line bg-surface/70 text-fg placeholder:text-muted focus:border-mint";
 
   return (
     <div ref={wrap} className={`relative w-full ${className}`}>
       <form onSubmit={go} role="search">
-        <label className="sr-only" htmlFor="site-search">
-          Search products
+        <label className={tone === "on-hero" ? "pointer-events-none absolute left-11 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold" : "sr-only"} htmlFor="site-search">
+          {tone === "on-hero" ? "Search" : "Search products"}
         </label>
         <div className="relative">
           <Icon name="search" size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 opacity-70" />
@@ -73,8 +73,8 @@ export function SearchBox({ tone = "default", autoFocus = false, onDone, classNa
             onChange={(e) => setQ(e.target.value)}
             onFocus={() => items.length && setOpen(true)}
             autoComplete="off"
-            placeholder="Search toothpaste, brushes, floss…"
-            className={`h-11 w-full rounded-full border pl-11 pr-4 text-sm outline-none transition duration-200 focus:shadow-[0_0_0_3px_rgb(43_193_177/0.25)] ${field}`}
+            placeholder={tone === "on-hero" ? "toothpaste, brushes, floss…" : "Search toothpaste, brushes, floss…"}
+            className={`h-11 w-full rounded-full border ${tone === "on-hero" ? "pl-[6.5rem]" : "pl-11"} pr-4 text-sm outline-none transition duration-200 focus:shadow-[0_0_0_3px_rgb(43_193_177/0.25)] ${field}`}
           />
         </div>
       </form>

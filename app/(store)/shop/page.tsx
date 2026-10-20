@@ -55,9 +55,9 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
   return (
     <div className="container-x py-8">
       <nav aria-label="Breadcrumb" className="mb-3 text-sm text-muted">
-        <Link href="/" className="hover:text-link">Home</Link> / <span className="text-fg">Shop</span>
+        <Link href="/" className="-mx-2 -my-3 inline-block px-2 py-3 hover:text-link">Home</Link> / <span className="text-fg">Shop</span>
       </nav>
-      <h1 className="text-3xl sm:text-4xl">{heading}</h1>
+      <h1 className="title-page">{heading}</h1>
       <p className="mb-6 mt-1 text-sm text-muted">
         {total} product{total === 1 ? "" : "s"}
       </p>
@@ -84,7 +84,7 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-link">
                 <Icon name="search" size={26} />
               </span>
-              <p className="font-display text-lg font-bold">No products match your filters</p>
+              <p className="font-display text-lg font-semibold">No products match your filters</p>
               <Link href="/shop" className="btn-outline">
                 Reset filters
               </Link>
@@ -173,8 +173,8 @@ function FilterForm({ query, cats, view }: { query: { q?: string; category?: str
         </select>
       </div>
       <button className="btn w-full">Apply filters</button>
-      <Link href="/shop" className="block text-center text-sm text-muted hover:text-link">
-        Reset
+      <Link href="/shop" className="flex min-h-11 items-center justify-center text-sm text-muted hover:text-link">
+        Reset filters
       </Link>
     </form>
   );

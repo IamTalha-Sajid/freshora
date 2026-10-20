@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Tip } from "@/components/Tooltip";
 
 function currentIsDark() {
   const attr = document.documentElement.getAttribute("data-theme");
@@ -20,8 +21,10 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
     setDark(next);
   }
 
+  const label = dark ? "Switch to light mode" : "Switch to dark mode";
   return (
-    <button type="button" onClick={toggle} aria-label={dark ? "Switch to light mode" : "Switch to dark mode"} className={`flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-accent ${className}`}>
+    <Tip label={label}>
+    <button type="button" onClick={toggle} aria-label={label} className={`flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-accent ${className}`}>
       {dark ? (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
           <circle cx="12" cy="12" r="4" />
@@ -33,5 +36,6 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         </svg>
       )}
     </button>
+    </Tip>
   );
 }

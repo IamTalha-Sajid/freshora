@@ -14,21 +14,10 @@ export function Logo({ className = "h-9", href = "/", onDark = false, lightOnly 
     </>
   );
   return href ? (
-    <Link href={href} aria-label="Freshora home" className="flex shrink-0 items-center">
+    <Link href={href} aria-label="Freshora home" className="flex min-h-11 shrink-0 items-center">
       {img}
     </Link>
   ) : (
     <span className="flex items-center">{img}</span>
-  );
-}
-
-/** Soft blurred navy/teal/mint blobs. Place behind glass so the blur has color to pick up. */
-export function Blobs({ className = "" }: { className?: string }) {
-  return (
-    <div aria-hidden className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      <div className="absolute -left-24 top-10 h-80 w-80 animate-float rounded-full bg-mint/30 blur-3xl" />
-      <div className="absolute right-0 top-1/3 h-96 w-96 animate-float rounded-full bg-teal/25 blur-3xl [animation-delay:-3s]" />
-      <div className="absolute -bottom-20 left-1/3 h-80 w-80 animate-float rounded-full bg-navy/20 blur-3xl [animation-delay:-6s]" />
-    </div>
   );
 }

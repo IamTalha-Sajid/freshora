@@ -1,11 +1,13 @@
 "use client";
 
+import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, ErrorMsg, PageHeader } from "@/components/admin/ui";
 
 type Review = { _id: string; name: string; email?: string; rating: number; comment: string; approved: boolean; createdAt: string; product: { name: string } | null };
 
 export default function ReviewsAdmin() {
+  const confirm = useConfirm();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [error, setError] = useState("");
   const load = useCallback(async () => setReviews(await adminFetch<Review[]>("/api/admin/reviews")), []);
@@ -23,19 +25,19 @@ export default function ReviewsAdmin() {
             <div className="min-w-0 flex-1">
               <div className="text-sm">
                 <b>{r.name}</b> on <span className="text-brand">{r.product?.name ?? "(deleted product)"}</span>{" "}
-                <span className="text-amber-500">{"★".repeat(r.rating)}</span>
-                {!r.approved && <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">Pending</span>}
+                <span className="text-warn-fg">{"★".repeat(r.rating)}</span>
+                {!r.approved && <span className="ml-2 rounded bg-warn-bg px-2 py-0.5 text-xs font-semibold text-warn-fg">Pending</span>}
               </div>
-              <p className="mt-1 text-gray-700">{r.comment}</p>
-              <div className="text-xs text-gray-400">{r.email} · {new Date(r.createdAt).toLocaleDateString()}</div>
+              <p className="mt-1 text-muted">{r.comment}</p>
+              <div className="text-xs text-muted">{r.email} · {new Date(r.createdAt).toLocaleDateString()}</div>
             </div>
             <div className="flex gap-2">
               <button className={r.approved ? "btn-outline" : "btn"} onClick={async () => { await adminFetch(`/api/admin/reviews/${r._id}`, "PUT", { approved: !r.approved }); load(); }}>{r.approved ? "Unapprove" : "Approve"}</button>
-              <button className="btn-danger" onClick={async () => { if (confirm("Delete review?")) { await adminFetch(`/api/admin/reviews/${r._id}`, "DELETE"); load(); } }}>Delete</button>
+              <button className="btn-danger" onClick={async () => { if (await confirm({ title: `Delete the review by ${r.name}?`, message: "This also updates the product's rating.", confirmLabel: "Delete review", tone: "danger" })) { await adminFetch(`/api/admin/reviews/${r._id}`, "DELETE").catch(() => {}); load(); } }}>Delete</button>
             </div>
           </div>
         ))}
-        {reviews.length === 0 && <div className="card p-10 text-center text-gray-500">No reviews yet.</div>}
+        {reviews.length === 0 && <div className="card p-10 text-center text-muted">No reviews yet.</div>}
       </div>
     </>
   );

@@ -8,11 +8,12 @@ export const GET = api(
     const settings = await getSettings();
     const since = new Date(Date.now() - 30 * 86400000);
     const live = { status: { $ne: "cancelled" } };
+    const paid = { ...live, paymentStatus: "paid" };
     const [byStatus, totals, daily, top, lowStock] = await Promise.all([
       Order.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
-      Order.aggregate([{ $match: live }, { $group: { _id: null, revenue: { $sum: "$total" }, orders: { $sum: 1 } } }]),
+      Order.aggregate([{ $match: live }, { $group: { _id: null, revenue: { $sum: { $cond: [{ $eq: ["$paymentStatus", "paid"] }, "$total", 0] } }, outstanding: { $sum: { $cond: [{ $eq: ["$paymentStatus", "paid"] }, 0, "$total"] } }, orders: { $sum: 1 } } }]),
       Order.aggregate([
-        { $match: { ...live, createdAt: { $gte: since } } },
+        { $match: { ...paid, createdAt: { $gte: since } } },
         { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, revenue: { $sum: "$total" }, orders: { $sum: 1 } } },
         { $sort: { _id: 1 } },
       ]),
@@ -29,7 +30,7 @@ export const GET = api(
         .limit(20)
         .lean(),
     ]);
-    return { byStatus, revenue: totals[0]?.revenue ?? 0, orders: totals[0]?.orders ?? 0, daily, top, lowStock };
+    return { byStatus, revenue: totals[0]?.revenue ?? 0, outstanding: totals[0]?.outstanding ?? 0, orders: totals[0]?.orders ?? 0, daily, top, lowStock };
   },
   { admin: true }
 );

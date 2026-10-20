@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { notify } from "@/components/toast-bus";
 
 export async function adminFetch<T = unknown>(url: string, method = "GET", body?: unknown): Promise<T> {
   const res = await fetch(url, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
@@ -9,7 +10,12 @@ export async function adminFetch<T = unknown>(url: string, method = "GET", body?
     throw new Error("Session expired");
   }
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error ?? "Request failed");
+  const changes = method !== "GET";
+  if (!res.ok) {
+    if (changes) notify.error(data.error ?? "That didn't go through. Try again.");
+    throw new Error(data.error ?? "Request failed");
+  }
+  if (changes) notify.success(method === "POST" ? "Created" : method === "DELETE" ? "Deleted" : "Changes saved");
   return data as T;
 }
 
@@ -24,7 +30,7 @@ export const fromLocalInput = (v: string) => (v ? new Date(v).toISOString() : ""
 export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-bold">{title}</h1>
+      <h1 className="text-2xl font-semibold">{title}</h1>
       <div className="flex gap-2">{children}</div>
     </div>
   );
@@ -35,7 +41,7 @@ export function Field({ label, children, hint }: { label: string; children: Reac
     <div>
       <label className="label">{label}</label>
       {children}
-      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   );
 }
@@ -49,7 +55,7 @@ export function Check({ label, checked, onChange }: { label: string; checked: bo
 }
 
 export function ErrorMsg({ msg }: { msg: string }) {
-  return msg ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{msg}</p> : null;
+  return msg ? <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger-fg">{msg}</p> : null;
 }
 
 export function ImageUpload({ value, onChange, multiple = false }: { value: string[]; onChange: (v: string[]) => void; multiple?: boolean }) {
