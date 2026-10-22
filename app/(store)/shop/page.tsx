@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { getCategories, searchProducts, type PCategory } from "@/lib/data";
 import { formatPKR } from "@/lib/pricing";
 
-export const metadata = { title: "Shop" };
+export const metadata = { title: "Shop", description: "Browse toothpaste, brushes, mouthwash and more dental and oral-care essentials." };
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 const num = (v?: string) => (v && !Number.isNaN(Number(v)) ? Number(v) : undefined);

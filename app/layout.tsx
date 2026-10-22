@@ -8,9 +8,18 @@ import "./globals.css";
 const display = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"], weight: ["600"] });
 const body = Manrope({ variable: "--font-manrope", subsets: ["latin"], weight: ["400", "600"] });
 
+// Absolute base so og:image and canonical URLs resolve. Defaults to the live domain; override with NEXT_PUBLIC_SITE_URL.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.fresh-ora.store";
+const description = "Premium dental and oral-care products, delivered fresh to your door across Pakistan.";
+
+// The share image comes from app/opengraph-image.png and app/twitter-image.png.
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: "Freshora | Dental & Oral Care", template: "%s | Freshora" },
-  description: "Premium dental and oral-care products, delivered fresh.",
+  description,
+  applicationName: "Freshora",
+  openGraph: { type: "website", siteName: "Freshora", title: "Freshora | Dental & Oral Care", description, locale: "en_PK" },
+  twitter: { card: "summary_large_image", title: "Freshora | Dental & Oral Care", description },
 };
 
 export const viewport: Viewport = {

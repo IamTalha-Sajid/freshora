@@ -11,7 +11,11 @@ import { effectivePrice, formatPKR, isOnSale } from "@/lib/pricing";
 export async function generateMetadata({ params }: PageProps<"/product/[slug]">): Promise<Metadata> {
   const p = await getProductBySlug((await params).slug);
   if (!p) return {};
-  return { title: p.seoTitle || p.name, description: p.seoDescription || p.shortDescription };
+  const title = p.seoTitle || p.name;
+  const description = p.seoDescription || p.shortDescription;
+  // Share the product's own photo; pages without one fall back to the site-wide logo image.
+  const images = p.images[0] ? [p.images[0]] : undefined;
+  return { title, description, openGraph: { title, description, images }, twitter: { title, description, images } };
 }
 
 function Accordion({ title, children, open = false }: { title: string; children: React.ReactNode; open?: boolean }) {
