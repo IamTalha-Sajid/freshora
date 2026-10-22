@@ -2,8 +2,11 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Logo } from "@/components/Brand";
 import { StoreChrome } from "@/components/StoreChrome";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { getCategories, getFeaturedProducts } from "@/lib/data";
 import { getSettings } from "@/lib/models/Settings";
+import { WHATSAPP_URL } from "@/lib/whatsapp";
 
 // All storefront pages read live data from MongoDB.
 export const dynamic = "force-dynamic";
@@ -21,6 +24,8 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
         </div>
       )}
       <StoreChrome categories={categories} shipping={{ fee: settings.shippingFee, threshold: settings.freeShippingThreshold }} upsell={upsell} announcement={announcement} />
+
+      <WhatsAppButton />
 
       <main className="flex-1 pt-[var(--hdr-pad)]">{children}</main>
 
@@ -78,7 +83,11 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
                   </a>
                 </li>
               )}
-              {!settings.contactPhone && !settings.contactEmail && <li className="text-[#9db9bf]">Add contact details in admin settings.</li>}
+              <li>
+                <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="-mx-2 inline-flex min-h-11 items-center gap-2 px-2 hover:text-[#4fd3c4]">
+                  <WhatsAppIcon size={18} /> Connect on WhatsApp
+                </a>
+              </li>
             </ul>
           </div>
         </div>

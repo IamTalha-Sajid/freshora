@@ -114,6 +114,16 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
                     </span>
                   </div>
                   <p className="mt-1 text-sm">{r.comment}</p>
+                  {r.images?.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {r.images.map((src) => (
+                        <a key={src} href={src} target="_blank" rel="noopener noreferrer" className="block h-16 w-16 overflow-hidden rounded-lg border border-line/70">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={src} alt={`Photo from ${r.name}`} loading="lazy" className="h-full w-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

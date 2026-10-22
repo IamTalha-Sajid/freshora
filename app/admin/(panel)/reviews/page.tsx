@@ -4,7 +4,7 @@ import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
 import { adminFetch, ErrorMsg, PageHeader } from "@/components/admin/ui";
 
-type Review = { _id: string; name: string; email?: string; rating: number; comment: string; approved: boolean; createdAt: string; product: { name: string } | null };
+type Review = { _id: string; name: string; email?: string; rating: number; comment: string; images?: string[]; approved: boolean; createdAt: string; product: { name: string } | null };
 
 export default function ReviewsAdmin() {
   const confirm = useConfirm();
@@ -29,6 +29,16 @@ export default function ReviewsAdmin() {
                 {!r.approved && <span className="ml-2 rounded bg-warn-bg px-2 py-0.5 text-xs font-semibold text-warn-fg">Pending</span>}
               </div>
               <p className="mt-1 text-muted">{r.comment}</p>
+              {!!r.images?.length && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {r.images.map((src) => (
+                    <a key={src} href={src} target="_blank" rel="noopener noreferrer">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt="Review photo" className="h-16 w-16 rounded-lg object-cover" />
+                    </a>
+                  ))}
+                </div>
+              )}
               <div className="text-xs text-muted">{r.email} · {new Date(r.createdAt).toLocaleDateString()}</div>
             </div>
             <div className="flex gap-2">

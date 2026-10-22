@@ -111,6 +111,7 @@ export const reviewSchema = z.object({
   email: optEmail,
   rating: z.coerce.number().int().min(1).max(5),
   comment: z.string().trim().min(3).max(1000),
+  images: z.array(z.url()).max(5).default([]),
 });
 
 export const reviewModerationSchema = z.object({ approved: z.boolean() });

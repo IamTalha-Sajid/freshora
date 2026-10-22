@@ -8,6 +8,7 @@ export interface IReview {
   email?: string;
   rating: number;
   comment: string;
+  images: string[];
   approved: boolean;
   createdAt: Date;
 }
@@ -19,6 +20,7 @@ const ReviewSchema = new Schema<IReview>(
     email: String,
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, required: true },
+    images: { type: [String], default: [] },
     approved: { type: Boolean, default: false },
   },
   { timestamps: true }
