@@ -1,13 +1,13 @@
 "use client";
 
 import { PasswordForm } from "@/components/admin/PasswordForm";
-import { ErrorMsg, Field, PageHeader } from "@/components/admin/ui";
+import { AdminLoading, ErrorMsg, Field, PageHeader } from "@/components/admin/ui";
 import { useSettings } from "@/components/admin/useSettings";
 import { Icon, ICON_NAMES } from "@/components/Icon";
 
 export default function SettingsAdmin() {
   const { settings: s, setSettings, save, error, saved } = useSettings();
-  if (!s) return error ? <ErrorMsg msg={error} /> : <p>Loading…</p>;
+  if (!s) return error ? <ErrorMsg msg={error} /> : <AdminLoading />;
   const set = <K extends keyof typeof s>(k: K, v: (typeof s)[K]) => setSettings({ ...s, [k]: v });
 
   return (

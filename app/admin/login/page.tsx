@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "@/components/Brand";
+import { Loader } from "@/components/Loader";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function AdminLogin() {
@@ -44,6 +45,11 @@ export default function AdminLogin() {
         </div>
         {error && <p className="text-sm text-danger-fg">{error}</p>}
         <button className="btn w-full" disabled={busy}>
+          {busy && (
+            <span data-theme="dark" className="flex">
+              <Loader size={22} />
+            </span>
+          )}
           {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>

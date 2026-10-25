@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { adminFetch, ErrorMsg, PageHeader } from "@/components/admin/ui";
+import { Icon } from "@/components/Icon";
+import { adminFetch, AdminLoading, ErrorMsg, PageHeader } from "@/components/admin/ui";
 import { formatPKR } from "@/lib/pricing";
 
 type Stats = {
@@ -23,24 +24,29 @@ export default function Dashboard() {
   }, []);
 
   if (error) return <ErrorMsg msg={error} />;
-  if (!s) return <p>Loading…</p>;
+  if (!s) return <AdminLoading />;
   const count = (st: string) => s.byStatus.find((x) => x._id === st)?.n ?? 0;
   const max = Math.max(1, ...s.daily.map((d) => d.revenue));
 
   return (
     <>
       <PageHeader title="Dashboard" />
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
         {[
-          ["Revenue (paid)", formatPKR(s.revenue)],
-          ["Awaiting payment", formatPKR(s.outstanding)],
-          ["Orders", String(s.orders)],
-          ["Pending orders", String(count("pending"))],
-          ["Low-stock products", String(s.lowStock.length)],
-        ].map(([k, v]) => (
-          <div key={k} className="card p-4">
-            <div className="text-xs font-semibold uppercase text-muted">{k}</div>
-            <div className="mt-1 text-2xl font-semibold">{v}</div>
+          ["Revenue (paid)", formatPKR(s.revenue), "cash"],
+          ["Awaiting payment", formatPKR(s.outstanding), "clock"],
+          ["Orders", String(s.orders), "box"],
+          ["Pending orders", String(count("pending")), "track"],
+          ["Low-stock products", String(s.lowStock.length), "alert"],
+        ].map(([k, v, icon]) => (
+          <div key={k} className="card flex flex-col gap-3 p-4">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-surface-alt text-link">
+              <Icon name={icon} size={18} />
+            </span>
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.06em] text-muted">{k}</div>
+              <div className="tabular mt-0.5 font-display text-2xl font-bold">{v}</div>
+            </div>
           </div>
         ))}
       </div>

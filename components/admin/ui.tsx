@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Loader } from "@/components/Loader";
 import { notify } from "@/components/toast-bus";
 
 export async function adminFetch<T = unknown>(url: string, method = "GET", body?: unknown): Promise<T> {
@@ -30,8 +31,17 @@ export const fromLocalInput = (v: string) => (v ? new Date(v).toISOString() : ""
 export function PageHeader({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-2xl font-semibold">{title}</h1>
+      <h1 className="font-display text-[1.75rem] font-bold">{title}</h1>
       <div className="flex gap-2">{children}</div>
+    </div>
+  );
+}
+
+/** Centered logo loader shown while an admin page fetches its data. */
+export function AdminLoading() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center">
+      <Loader size={80} label="Loading" />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useConfirm } from "@/components/ConfirmProvider";
 import { useCallback, useEffect, useState } from "react";
-import { adminFetch, Check, ErrorMsg, Field, fromLocalInput, ImageUpload, PageHeader, toLocalInput } from "@/components/admin/ui";
+import { adminFetch, AdminLoading, Check, ErrorMsg, Field, fromLocalInput, ImageUpload, PageHeader, toLocalInput } from "@/components/admin/ui";
 import { useSettings } from "@/components/admin/useSettings";
 
 type Slide = { _id: string; image: string; headline: string; subtext?: string; ctaLabel?: string; ctaLink?: string; order: number; active: boolean };
@@ -46,7 +46,7 @@ export default function HomepageAdmin() {
     }
   }
 
-  if (!s) return error ? <ErrorMsg msg={error} /> : <p>Loading…</p>;
+  if (!s) return error ? <ErrorMsg msg={error} /> : <AdminLoading />;
 
   const move = (i: number, d: -1 | 1) => {
     const a = [...s.homeSections];
