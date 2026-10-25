@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { Loader } from "@/components/Loader";
 import { useStore } from "@/components/StoreProvider";
-import { formatPKR, shippingFor } from "@/lib/pricing";
+import { formatPKR, lineTotal, shippingFor } from "@/lib/pricing";
 
 type Pub = { shippingFee: number; freeShippingThreshold: number; bankDetails: string };
 const STEPS = ["Details", "Payment", "Review"];
@@ -303,7 +303,7 @@ export default function CheckoutPage() {
                   <span className="tabular absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--btn-bg)] px-1 text-xs font-semibold text-[var(--btn-fg)]">{l.qty}</span>
                 </div>
                 <span className="min-w-0 flex-1 truncate">{l.name}</span>
-                <span className="tabular">{formatPKR(l.price * l.qty)}</span>
+                <span className="tabular">{formatPKR(lineTotal(l))}</span>
               </li>
             ))}
           </ul>

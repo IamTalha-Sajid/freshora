@@ -31,14 +31,17 @@ type Product = {
   salePrice?: number;
   saleStart?: string;
   saleEnd?: string;
+  offers?: { qty: number; price: number; label?: string; best?: boolean }[];
 };
+
+type OfferForm = { qty: string; price: string; label: string; best: boolean };
 
 type Form = {
   name: string; price: string; category: string; images: string[]; stock: string;
   sku: string; shortDescription: string; description: string; compareAtPrice: string; weight: string; tags: string;
   lowStockThreshold: string; seoTitle: string; seoDescription: string; featured: boolean; active: boolean;
   salePrice: string; saleStart: string; saleEnd: string;
-  ingredients: string; howToUse: string; faq: { q: string; a: string }[];
+  ingredients: string; howToUse: string; faq: { q: string; a: string }[]; offers: OfferForm[];
   /** Stock when the form was opened; the server applies the edit as a change against it. */
   stockBase: string;
 };
@@ -46,7 +49,7 @@ type Form = {
 const empty: Form = {
   name: "", price: "", category: "", images: [], stock: "0", sku: "", shortDescription: "", description: "", compareAtPrice: "", weight: "", tags: "",
   lowStockThreshold: "", seoTitle: "", seoDescription: "", featured: false, active: true, salePrice: "", saleStart: "", saleEnd: "",
-  ingredients: "", howToUse: "", faq: [], stockBase: "",
+  ingredients: "", howToUse: "", faq: [], offers: [], stockBase: "",
 };
 
 const s = (v: unknown) => (v == null ? "" : String(v));
@@ -59,6 +62,7 @@ function toForm(p: Product): Form {
     tags: p.tags.join(", "), lowStockThreshold: s(p.lowStockThreshold), seoTitle: s(p.seoTitle), seoDescription: s(p.seoDescription),
     featured: p.featured, active: p.active, salePrice: s(p.salePrice), saleStart: toLocalInput(p.saleStart), saleEnd: toLocalInput(p.saleEnd),
     ingredients: s(p.ingredients), howToUse: s(p.howToUse), faq: p.faq ?? [], stockBase: s(p.stock),
+    offers: (p.offers ?? []).map((o) => ({ qty: s(o.qty), price: s(o.price), label: s(o.label), best: !!o.best })),
   };
 }
 
@@ -94,6 +98,7 @@ export default function ProductsAdmin() {
         ...form,
         tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
         faq: form.faq.filter((q) => q.q.trim() && q.a.trim()),
+        offers: form.offers.filter((o) => o.qty && o.price),
         saleStart: fromLocalInput(form.saleStart),
         saleEnd: fromLocalInput(form.saleEnd),
       };
@@ -154,6 +159,27 @@ export default function ProductsAdmin() {
             <Field label="Starts"><input type="datetime-local" {...text("saleStart")} /></Field>
             <Field label="Ends"><input type="datetime-local" {...text("saleEnd")} /></Field>
           </div>
+        </section>
+
+        <section className="card space-y-3 p-5">
+          <h2 className="font-semibold">Quantity offers <span className="text-sm font-normal text-muted">(optional, e.g. 2 for Rs. 800, 3 for Rs. 1,100)</span></h2>
+          <p className="text-xs text-muted">Customers pick a pack on the product page. 1 unit is always the normal price. Offers that cost more per unit than the normal price are ignored.</p>
+          {form.offers.map((o, i) => {
+            const patch = (p: Partial<OfferForm>) => setForm((x) => ({ ...x, offers: x.offers.map((y, j) => (j === i ? { ...y, ...p } : p.best ? { ...y, best: false } : y)) }));
+            const unit = Number(form.price) || 0;
+            const per = Number(o.qty) > 0 && Number(o.price) > 0 ? Number(o.price) / Number(o.qty) : 0;
+            return (
+              <div key={i} className="flex flex-wrap items-end gap-2">
+                <Field label="Quantity"><input className="input !w-24" type="number" min={2} max={100} value={o.qty} onChange={(e) => patch({ qty: e.target.value })} /></Field>
+                <Field label="Total price (PKR)"><input className="input !w-36" type="number" min={0} step="any" value={o.price} onChange={(e) => patch({ price: e.target.value })} /></Field>
+                <Field label="Label (optional)"><input className="input !w-40" placeholder="e.g. Most popular" value={o.label} onChange={(e) => patch({ label: e.target.value })} /></Field>
+                <label className="mb-2.5 flex cursor-pointer items-center gap-1.5 text-sm"><input type="checkbox" checked={o.best} onChange={(e) => patch({ best: e.target.checked })} /> Best value</label>
+                {per > 0 && unit > 0 && <span className={`mb-3 text-xs ${per < unit ? "text-muted" : "text-danger-fg"}`}>{per < unit ? `${formatPKR(per)} each, saves ${Math.round((1 - per / unit) * 100)}%` : "Not cheaper per unit, will be ignored"}</span>}
+                <button type="button" className="btn-danger mb-1" aria-label="Remove offer" onClick={() => setForm((x) => ({ ...x, offers: x.offers.filter((_, j) => j !== i) }))}>✕</button>
+              </div>
+            );
+          })}
+          {form.offers.length < 5 && <button type="button" className="btn-outline" onClick={() => setForm((x) => ({ ...x, offers: [...x.offers, { qty: "", price: "", label: "", best: false }] }))}>+ Add offer</button>}
         </section>
 
         <section className="card space-y-4 p-5">

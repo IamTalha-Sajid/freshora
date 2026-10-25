@@ -1,9 +1,11 @@
 "use client";
 
 import { subscribeToasts } from "@/components/toast-bus";
+import { lineTotal, type Offer } from "@/lib/pricing";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-export type CartLine = { kind: "product" | "bundle"; id: string; slug: string; name: string; price: number; image?: string; qty: number; stock?: number };
+/** `price` is the unit price; `offers` (products only) lets the line total use quantity deals. */
+export type CartLine = { kind: "product" | "bundle"; id: string; slug: string; name: string; price: number; image?: string; qty: number; stock?: number; offers?: Offer[] };
 export const MAX_LINE_QTY = 100;
 const cap = (l: { qty: number; stock?: number }) => Math.max(1, Math.min(l.qty, MAX_LINE_QTY, l.stock ?? MAX_LINE_QTY));
 export type Toast = { id: number; message: string; tone: "info" | "success" | "error" };
@@ -74,7 +76,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setCart((c) => {
       const i = c.findIndex((x) => x.kind === line.kind && x.id === line.id);
       if (i === -1) return [...c, { ...line, qty: cap({ qty, stock: line.stock }) }];
-      return c.map((x, j) => (j === i ? { ...x, price: line.price, stock: line.stock ?? x.stock, qty: cap({ qty: x.qty + qty, stock: line.stock ?? x.stock }) } : x));
+      return c.map((x, j) => (j === i ? { ...x, price: line.price, offers: line.offers ?? x.offers, stock: line.stock ?? x.stock, qty: cap({ qty: x.qty + qty, stock: line.stock ?? x.stock }) } : x));
     });
     if (opts?.openDrawer !== false) setSheet("cart");
   }, []);
@@ -95,7 +97,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       try {
         const res = await fetch("/api/cart/check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: snapshot.map((l) => ({ kind: l.kind, id: l.id })) }) });
         if (!res.ok) return [];
-        const { lines } = (await res.json()) as { lines: { kind: CartLine["kind"]; id: string; available: boolean; price: number; stock: number }[] };
+        const { lines } = (await res.json()) as { lines: { kind: CartLine["kind"]; id: string; available: boolean; price: number; stock: number; offers?: Offer[] }[] };
         const find = (l: CartLine) => lines.find((x) => x.kind === l.kind && x.id === l.id);
         const changed: string[] = [];
         for (const l of snapshot) {
@@ -110,7 +112,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             const x = find(l);
             if (!x) return [l];
             if (!x.available) return [];
-            return [{ ...l, price: x.price, stock: x.stock, qty: cap({ qty: l.qty, stock: x.stock }) }];
+            return [{ ...l, price: x.price, offers: x.offers ?? l.offers, stock: x.stock, qty: cap({ qty: l.qty, stock: x.stock }) }];
           })
         );
         return changed;
@@ -153,7 +155,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       clearCart,
       syncCart,
       cartCount: cart.reduce((n, l) => n + l.qty, 0),
-      subtotal: cart.reduce((n, l) => n + l.price * l.qty, 0),
+      subtotal: cart.reduce((n, l) => n + lineTotal(l), 0),
       wishlist,
       toggleWishlist,
       ready,

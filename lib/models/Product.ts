@@ -1,5 +1,6 @@
 import { Schema, type Model, type Types } from "mongoose";
 import { defineModel } from "@/lib/define-model";
+import type { Offer } from "@/lib/pricing";
 
 export interface IProduct {
   _id: Types.ObjectId;
@@ -26,6 +27,8 @@ export interface IProduct {
   salePrice?: number;
   saleStart?: Date;
   saleEnd?: Date;
+  /** Quantity deals such as 2 for Rs. 800, shown on the product page. */
+  offers: Offer[];
   ratingAvg: number;
   ratingCount: number;
 }
@@ -55,6 +58,7 @@ const ProductSchema = new Schema<IProduct>(
     salePrice: Number,
     saleStart: Date,
     saleEnd: Date,
+    offers: { type: [{ qty: Number, price: Number, label: String, best: Boolean, _id: false }], default: [] },
     ratingAvg: { type: Number, default: 0 },
     ratingCount: { type: Number, default: 0 },
   },

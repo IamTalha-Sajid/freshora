@@ -20,14 +20,16 @@ export function BundleCard({ b }: { b: PBundle }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {image && <img src={image} alt="" className="h-full w-full object-contain p-4" loading="lazy" />}
         {save > 0 && <span className="chip-sale absolute left-3 top-3 !px-2 !py-[3px]">Save {save}%</span>}
+        {items.some((i) => i.free) && <span className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-mint px-2 py-[3px] text-xs font-extrabold text-[#06141b]"><Icon name="gift" size={13} strokeWidth={2.4} />Free item</span>}
       </div>
       <div className="flex flex-1 flex-col gap-3 p-5">
         <h3 className="text-xl font-bold">{b.name}</h3>
         <ul className="flex flex-col gap-1.5 text-sm text-fg-2">
           {items.map((i) => (
-            <li key={i.product._id} className="flex items-center gap-2">
-              <Icon name="check" size={14} strokeWidth={2.6} className="shrink-0 text-success" />
+            <li key={i.product._id} className="flex flex-wrap items-center gap-2">
+              <Icon name={i.free ? "gift" : "check"} size={14} strokeWidth={2.6} className="shrink-0 text-success" />
               {i.qty} × {i.product.name}
+              {i.free && <span className="rounded-md bg-mint px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.04em] text-[#06141b]">{i.qty > 1 ? "1 free" : "Free"}</span>}
             </li>
           ))}
         </ul>

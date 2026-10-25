@@ -18,7 +18,7 @@ export type PProduct = Omit<IProduct, "_id" | "category" | "saleStart" | "saleEn
   saleStart?: string;
   saleEnd?: string;
 };
-export type PBundle = { _id: string; name: string; slug: string; image?: string; price: number; items: { product: PProduct; qty: number }[] };
+export type PBundle = { _id: string; name: string; slug: string; image?: string; price: number; items: { product: PProduct; qty: number; free?: boolean }[] };
 
 export async function getCategories(): Promise<PCategory[]> {
   await connectDB();

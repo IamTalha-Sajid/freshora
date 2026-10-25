@@ -6,7 +6,7 @@ import { getSettings } from "@/lib/models/Settings";
 import { notifyNewOrder } from "@/lib/notify";
 import { newOrderNumber } from "@/lib/order-number";
 import { normalizePhone } from "@/lib/phone";
-import { effectivePrice, shippingFor } from "@/lib/pricing";
+import { effectivePrice, formatPKR, shippingFor, splitByOffers } from "@/lib/pricing";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
 import { checkoutSchema } from "@/lib/schemas";
 
@@ -47,7 +47,11 @@ export const POST = api(async (req) => {
   for (const it of body.items.filter((i) => i.kind === "product")) {
     const p = products.get(it.id);
     if (!p) throw new HttpError(400, "A product in your cart is no longer available. Refresh your cart and try again.");
-    lines.push({ product: p._id, name: p.name, price: effectivePrice(p), qty: it.qty, image: p.images[0] });
+    // Quantity offers become their own order lines ("3 for Rs. 1,100" x 1), so every line is still price x qty.
+    const unit = effectivePrice(p);
+    const { packs, singles } = splitByOffers(unit, p.offers, it.qty);
+    for (const { offer, count } of packs) lines.push({ product: p._id, name: `${p.name} (${offer.qty} for ${formatPKR(offer.price)})`, price: offer.price, qty: count, image: p.images[0] });
+    if (singles > 0) lines.push({ product: p._id, name: p.name, price: unit, qty: singles, image: p.images[0] });
     add(it.id, it.qty);
   }
   for (const it of body.items.filter((i) => i.kind === "bundle")) {

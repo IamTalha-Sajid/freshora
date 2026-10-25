@@ -71,7 +71,7 @@ export function ProductCard({ p, layout = "grid" }: { p: PProduct; layout?: "gri
   const price = effectivePrice(p);
   const out = p.stock <= 0;
   const low = !out && p.stock <= (p.lowStockThreshold ?? 5);
-  const add = () => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price, image: p.images[0], stock: p.stock });
+  const add = () => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price, image: p.images[0], stock: p.stock, offers: p.offers });
   const list = layout === "list";
 
   return (

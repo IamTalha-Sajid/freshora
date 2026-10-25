@@ -53,6 +53,12 @@ export const productSchema = z.object({
   salePrice: optNum,
   saleStart: optDate,
   saleEnd: optDate,
+  offers: z
+    .array(z.object({ qty: z.coerce.number().int().min(2).max(100), price: z.coerce.number().positive(), label: optStr, best: z.boolean().default(false) }))
+    .max(5)
+    .default([])
+    .refine((o) => new Set(o.map((x) => x.qty)).size === o.length, "Each offer needs a different quantity")
+    .refine((o) => o.filter((x) => x.best).length <= 1, "Only one offer can be marked best value"),
 }).superRefine(salePair);
 
 export const bundleSchema = z.object({
@@ -60,7 +66,11 @@ export const bundleSchema = z.object({
   slug: optStr,
   image: optSafeUrl,
   price: z.coerce.number().positive("Price must be greater than 0"),
-  items: z.array(z.object({ product: objectId, qty: z.coerce.number().int().min(1).max(100) })).min(1, "Add at least one product").max(30),
+  items: z
+    .array(z.object({ product: objectId, qty: z.coerce.number().int().min(1).max(100), free: z.boolean().default(false) }))
+    .min(1, "Add at least one product")
+    .max(30)
+    .refine((items) => items.filter((i) => i.free).length <= 1, "Only one item in a bundle can be free"),
   active: z.boolean().default(true),
 });
 

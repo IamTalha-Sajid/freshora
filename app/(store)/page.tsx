@@ -203,7 +203,7 @@ export default async function Home() {
     bundles:
       bundles.length > 0 && (
         <Section id="bundles" title={title("bundles")} href="/shop" linkLabel="All products">
-          <div className="grid gap-4 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]">
+          <div className="grid gap-4 md:grid-cols-[repeat(auto-fill,minmax(300px,1fr))]">
             {bundles.map((b) => (
               <BundleCard key={b._id} b={b} />
             ))}

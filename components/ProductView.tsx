@@ -100,7 +100,7 @@ export function ProductView({ p, reviews, related, category, freeShippingThresho
               <span aria-hidden className="h-2 w-2 rounded-full bg-current" />
               {out ? "Out of stock" : low ? `Only ${p.stock} left` : "In stock"}
             </span>
-            <ProductActions id={p._id} slug={p.slug} name={p.name} price={price} image={p.images[0]} stock={p.stock} />
+            <ProductActions id={p._id} slug={p.slug} name={p.name} price={price} image={p.images[0]} stock={p.stock} offers={p.offers} />
           </div>
 
           <div className="grid overflow-hidden rounded-xl border border-line bg-surface sm:grid-cols-[repeat(auto-fit,minmax(200px,1fr))]">

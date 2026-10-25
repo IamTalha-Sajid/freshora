@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { MAX_LINE_QTY, useStore } from "@/components/StoreProvider";
-import { formatPKR, shippingFor } from "@/lib/pricing";
+import { formatPKR, lineTotal, shippingFor, splitByOffers } from "@/lib/pricing";
 
 type Pub = { shippingFee: number; freeShippingThreshold: number };
 
@@ -69,7 +69,14 @@ export default function CartPage() {
                   </Link>{" "}
                   {l.kind === "bundle" && <span className="chip">Bundle</span>}
                 </div>
-                <div className="tabular text-[13px] text-muted">{formatPKR(l.price)} each</div>
+                <div className="tabular text-[13px] text-muted">
+                  {formatPKR(l.price)} each
+                  {splitByOffers(l.price, l.offers, l.qty).packs.map((k) => (
+                    <span key={k.offer.qty} className="chip ml-2 !py-px">
+                      {k.count} × {k.offer.qty} for {formatPKR(k.offer.price)}
+                    </span>
+                  ))}
+                </div>
               </div>
               <div className="flex h-11 items-center rounded-lg border border-input-line">
                 <button className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-surface-alt" onClick={() => setQty(l.kind, l.id, l.qty - 1)} aria-label={`Decrease ${l.name}`}>
@@ -80,7 +87,7 @@ export default function CartPage() {
                   <Icon name="plus" size={14} strokeWidth={2.6} />
                 </button>
               </div>
-              <div className="tabular hidden min-w-24 text-right font-extrabold sm:block">{formatPKR(l.price * l.qty)}</div>
+              <div className="tabular hidden min-w-24 text-right font-extrabold sm:block">{formatPKR(lineTotal(l))}</div>
               <button className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors hover:bg-sale-soft hover:text-danger-fg" aria-label={`Remove ${l.name}`} onClick={() => setQty(l.kind, l.id, 0)}>
                 <Icon name="trash" size={18} />
               </button>

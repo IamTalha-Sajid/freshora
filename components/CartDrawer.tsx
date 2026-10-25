@@ -5,7 +5,7 @@ import { Drawer } from "@/components/Drawer";
 import { Icon } from "@/components/Icon";
 import { useStore } from "@/components/StoreProvider";
 import type { PProduct } from "@/lib/data";
-import { effectivePrice, formatPKR, shippingFor } from "@/lib/pricing";
+import { effectivePrice, formatPKR, lineTotal, shippingFor, splitByOffers } from "@/lib/pricing";
 
 export type ShippingInfo = { fee: number; threshold: number };
 
@@ -85,7 +85,10 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
                 <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-sm font-semibold">{l.name}</p>
                   {l.kind === "bundle" && <span className="chip mt-0.5">Bundle</span>}
-                  <p className="tabular mt-0.5 text-sm text-muted">{formatPKR(l.price)}</p>
+                  <p className="tabular mt-0.5 text-sm text-muted">
+                    {formatPKR(lineTotal(l))}
+                    {splitByOffers(l.price, l.offers, l.qty).packs.length > 0 && <span className="chip ml-2 !py-px">Offer applied</span>}
+                  </p>
                   <div className="mt-2 flex items-center justify-between">
                     <div className="flex items-center rounded-lg border border-input-line">
                       <button className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-surface-alt" onClick={() => setQty(l.kind, l.id, l.qty - 1)} aria-label={`Decrease ${l.name}`}>
@@ -123,7 +126,7 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
                     </div>
                     <button
                       className="btn-outline !min-h-9 !px-3.5 !py-1"
-                      onClick={() => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price: effectivePrice(p), image: p.images[0] }, 1, { openDrawer: false })}
+                      onClick={() => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price: effectivePrice(p), image: p.images[0], offers: p.offers }, 1, { openDrawer: false })}
                     >
                       Add
                     </button>

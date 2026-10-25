@@ -31,7 +31,7 @@ export function SaleCard({ p }: { p: PProduct }) {
         type="button"
         disabled={out}
         aria-label={out ? `${p.name} is sold out` : `Add ${p.name} to cart`}
-        onClick={() => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price, image: p.images[0], stock: p.stock })}
+        onClick={() => addToCart({ kind: "product", id: p._id, slug: p.slug, name: p.name, price, image: p.images[0], stock: p.stock, offers: p.offers })}
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[var(--btn-bg)] text-[var(--btn-fg)] transition-colors hover:bg-[var(--btn-bg-hover)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Icon name="plus" size={18} strokeWidth={2.4} />

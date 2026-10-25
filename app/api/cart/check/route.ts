@@ -2,14 +2,14 @@ import { z } from "zod";
 import { api } from "@/lib/api";
 import { Bundle } from "@/lib/models/Bundle";
 import { Product } from "@/lib/models/Product";
-import { effectivePrice } from "@/lib/pricing";
+import { effectivePrice, type Offer } from "@/lib/pricing";
 import { clientIp, rateLimit } from "@/lib/ratelimit";
 
 const body = z.object({
   items: z.array(z.object({ kind: z.enum(["product", "bundle"]), id: z.string().regex(/^[a-f\d]{24}$/i) })).max(50),
 });
 
-export type CartCheckLine = { kind: "product" | "bundle"; id: string; available: boolean; price: number; stock: number };
+export type CartCheckLine = { kind: "product" | "bundle"; id: string; available: boolean; price: number; stock: number; offers?: Offer[] };
 
 // Public: current price and stock for what's in a visitor's cart, so the browser's saved copy never goes stale.
 export const POST = api(async (req) => {
@@ -22,7 +22,7 @@ export const POST = api(async (req) => {
   const lines: CartCheckLine[] = items.map((it) => {
     if (it.kind === "product") {
       const p = products.get(it.id);
-      return p ? { ...it, available: p.stock > 0, price: effectivePrice(p), stock: p.stock } : { ...it, available: false, price: 0, stock: 0 };
+      return p ? { ...it, available: p.stock > 0, price: effectivePrice(p), stock: p.stock, offers: p.offers ?? [] } : { ...it, available: false, price: 0, stock: 0 };
     }
     const b = bundles.find((x) => String(x._id) === it.id);
     const parts = b?.items.map((i) => ({ p: products.get(String(i.product)), qty: i.qty })) ?? [];

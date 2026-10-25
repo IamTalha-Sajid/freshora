@@ -6,9 +6,9 @@ import { adminFetch, Check, ErrorMsg, Field, ImageUpload, PageHeader } from "@/c
 import { formatPKR } from "@/lib/pricing";
 
 type Prod = { _id: string; name: string; price: number };
-type Bundle = { _id: string; name: string; image?: string; price: number; active: boolean; items: { product: Prod | null; qty: number }[] };
-type Form = { name: string; image: string; price: string; active: boolean; items: { product: string; qty: number }[] };
-const empty: Form = { name: "", image: "", price: "", active: true, items: [{ product: "", qty: 1 }] };
+type Bundle = { _id: string; name: string; image?: string; price: number; active: boolean; items: { product: Prod | null; qty: number; free?: boolean }[] };
+type Form = { name: string; image: string; price: string; active: boolean; items: { product: string; qty: number; free: boolean }[] };
+const empty: Form = { name: "", image: "", price: "", active: true, items: [{ product: "", qty: 1, free: false }] };
 
 export default function BundlesAdmin() {
   const confirm = useConfirm();
@@ -41,8 +41,20 @@ export default function BundlesAdmin() {
     }
   }
 
-  const setItem = (i: number, patch: Partial<Form["items"][number]>) => setForm({ ...form, items: form.items.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
-  const regular = form.items.reduce((s, i) => s + (products.find((p) => p._id === i.product)?.price ?? 0) * i.qty, 0);
+  const unit = (id: string) => products.find((p) => p._id === id)?.price ?? 0;
+  const regular = form.items.reduce((s, i) => s + unit(i.product) * i.qty, 0);
+  // With a free item, the paid total is everything except one unit of that item.
+  const freeItem = form.items.find((i) => i.free && i.product);
+  const paidTotal = regular - (freeItem ? unit(freeItem.product) : 0);
+  // Changing items keeps the price in step with the paid total while a free item is set; typing a price takes over.
+  const setItems = (items: Form["items"]) => {
+    const fi = items.find((x) => x.free && x.product);
+    const next = { ...form, items };
+    if (fi) next.price = String(items.reduce((s, x) => s + unit(x.product) * x.qty, 0) - unit(fi.product));
+    setForm(next);
+  };
+  const setItem = (i: number, patch: Partial<Form["items"][number]>) =>
+    setItems(form.items.map((x, j) => (j === i ? { ...x, ...patch } : patch.free ? { ...x, free: false } : x)));
 
   if (editing) {
     return (
@@ -60,14 +72,20 @@ export default function BundlesAdmin() {
                   <option value="">Select product…</option>
                   {products.map((p) => <option key={p._id} value={p._id}>{p.name} ({formatPKR(p.price)})</option>)}
                 </select>
-                <input className="input !w-20" type="number" min={1} value={it.qty} onChange={(e) => setItem(i, { qty: Number(e.target.value) })} />
-                <button type="button" className="btn-danger" onClick={() => setForm({ ...form, items: form.items.filter((_, j) => j !== i) })}>✕</button>
+                <input className="input !w-20" type="number" min={1} aria-label="Quantity" value={it.qty} onChange={(e) => setItem(i, { qty: Number(e.target.value) })} />
+                <label className="flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap text-sm" title="One unit of this item is free">
+                  <input type="checkbox" checked={it.free} onChange={(e) => setItem(i, { free: e.target.checked })} /> 1 free
+                </label>
+                <button type="button" className="btn-danger" onClick={() => setItems(form.items.filter((_, j) => j !== i))}>✕</button>
               </div>
             ))}
           </div>
-          <button type="button" className="btn-outline mt-2" onClick={() => setForm({ ...form, items: [...form.items, { product: "", qty: 1 }] })}>+ Add product</button>
+          <button type="button" className="btn-outline mt-2" onClick={() => setForm({ ...form, items: [...form.items, { product: "", qty: 1, free: false }] })}>+ Add product</button>
         </div>
-        <Field label="Bundle price (PKR) *" hint={regular ? `Items total ${formatPKR(regular)} at regular price` : undefined}>
+        <Field
+          label="Bundle price (PKR) *"
+          hint={regular ? (freeItem ? `Items total ${formatPKR(regular)}; with one free unit the paid total is ${formatPKR(paidTotal)} (filled in automatically, you can still change it)` : `Items total ${formatPKR(regular)} at regular price`) : undefined}
+        >
           <input className="input" required type="number" min={0} step="any" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
         </Field>
         <Check label="Active" checked={form.active} onChange={(v) => setForm({ ...form, active: v })} />
@@ -92,11 +110,11 @@ export default function BundlesAdmin() {
             {bundles.map((b) => (
               <tr key={b._id} className="border-t">
                 <td className="p-3 font-semibold">{b.name}</td>
-                <td className="text-muted">{b.items.map((i) => `${i.qty}× ${i.product?.name ?? "(deleted)"}`).join(", ")}</td>
+                <td className="text-muted">{b.items.map((i) => `${i.qty}× ${i.product?.name ?? "(deleted)"}${i.free ? " (1 free)" : ""}`).join(", ")}</td>
                 <td>{formatPKR(b.price)}</td>
                 <td>{b.active ? "✓" : ""}</td>
                 <td className="space-x-2 whitespace-nowrap p-3 text-right">
-                  <button className="btn-outline !px-3 !py-1.5" onClick={() => { setForm({ name: b.name, image: b.image ?? "", price: String(b.price), active: b.active, items: b.items.filter((i) => i.product).map((i) => ({ product: i.product!._id, qty: i.qty })) }); setEditing(b._id); setError(""); }}>Edit</button>
+                  <button className="btn-outline !px-3 !py-1.5" onClick={() => { setForm({ name: b.name, image: b.image ?? "", price: String(b.price), active: b.active, items: b.items.filter((i) => i.product).map((i) => ({ product: i.product!._id, qty: i.qty, free: !!i.free })) }); setEditing(b._id); setError(""); }}>Edit</button>
                   <button className="btn-danger" onClick={async () => { if (await confirm({ title: `Delete "${b.name}"?`, message: "Customers will no longer see this bundle. Past orders are not affected.", confirmLabel: "Delete bundle", tone: "danger" })) { await adminFetch(`/api/admin/bundles/${b._id}`, "DELETE").catch(() => {}); load(); } }}>Delete</button>
                 </td>
               </tr>

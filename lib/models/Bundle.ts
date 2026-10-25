@@ -7,7 +7,8 @@ export interface IBundle {
   slug: string;
   image?: string;
   price: number;
-  items: { product: Types.ObjectId; qty: number }[];
+  /** `free`: one unit of this item is free (the bundle price already accounts for it). */
+  items: { product: Types.ObjectId; qty: number; free?: boolean }[];
   active: boolean;
 }
 
@@ -17,7 +18,7 @@ const BundleSchema = new Schema<IBundle>(
     slug: { type: String, required: true, unique: true },
     image: String,
     price: { type: Number, required: true, min: 0 },
-    items: [{ product: { type: Schema.Types.ObjectId, ref: "Product", required: true }, qty: { type: Number, default: 1, min: 1 }, _id: false }],
+    items: [{ product: { type: Schema.Types.ObjectId, ref: "Product", required: true }, qty: { type: Number, default: 1, min: 1 }, free: { type: Boolean, default: false }, _id: false }],
     active: { type: Boolean, default: true },
   },
   { timestamps: true }
