@@ -18,7 +18,7 @@ export function BundleCard({ b }: { b: PBundle }) {
     <article className="card flex h-full flex-col overflow-hidden">
       <div className="relative aspect-video bg-surface-alt">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {image && <img src={image} alt="" className="h-full w-full object-contain p-4" loading="lazy" />}
+        {image && <img src={image} alt="" className="h-full w-full object-cover" loading="lazy" />}
         {save > 0 && <span className="chip-sale absolute left-3 top-3 !px-2 !py-[3px]">Save {save}%</span>}
         {items.some((i) => i.free) && <span className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-mint px-2 py-[3px] text-xs font-extrabold text-[#06141b]"><Icon name="gift" size={13} strokeWidth={2.4} />Free item</span>}
       </div>

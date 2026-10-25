@@ -95,11 +95,16 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
         </div>
 
         <div className="border-t border-[#12303c]">
-          <div className="container-x flex flex-wrap items-center justify-between gap-4 py-[18px] text-[13px] text-[#9db9bf]">
+          <div className="container-x grid items-center gap-4 py-[18px] text-[13px] text-[#9db9bf] lg:grid-cols-3">
             <span>
               © {new Date().getFullYear()} {settings.storeName}. All rights reserved.
             </span>
-            <div className="flex flex-wrap items-center gap-2">
+            <a href="https://talha.is-a.dev/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 justify-self-start text-[15px] font-semibold text-white transition-opacity hover:opacity-80 lg:justify-self-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/talha.png" alt="" width={28} height={28} className="rounded-lg" />
+              Made by Talha
+            </a>
+            <div className="flex flex-wrap items-center gap-2 lg:justify-self-end">
               <span>We accept</span>
               <span className={chip}>
                 <Icon name="cash" size={14} className="text-[#4fd3c4]" />
