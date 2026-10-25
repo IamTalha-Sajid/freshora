@@ -79,7 +79,7 @@ export function ProductCard({ p, layout = "grid" }: { p: PProduct; layout?: "gri
       <article className={`card card-hover group @container relative overflow-hidden ${list ? "flex gap-4 p-3 sm:gap-6 sm:p-4" : "flex h-full flex-col"}`}>
         <Link href={`/product/${p.slug}`} className={`relative block shrink-0 overflow-hidden bg-surface-alt ${list ? "h-32 w-32 rounded-xl sm:h-44 sm:w-44" : "aspect-square"}`} aria-label={p.name}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={p.images[0]} alt="" className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105" loading="lazy" />
+          <img src={p.images[0]} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" loading="lazy" />
           {sale && <span className="chip-sale absolute left-3 top-3 tabular">-{Math.round((1 - price / p.price) * 100)}%</span>}
           {out && <span className="absolute inset-x-0 bottom-0 bg-[#06141b]/70 py-1.5 text-center text-xs font-semibold text-white">Out of stock</span>}
         </Link>
