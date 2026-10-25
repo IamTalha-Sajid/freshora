@@ -29,11 +29,11 @@ export function Countdown({ end, compact = false }: { end: string; compact?: boo
     ["Sec", Math.floor(left / 1000) % 60],
   ] as const;
   return (
-    <div className="flex gap-2" role="timer" aria-label="Sale ends in">
+    <div className="flex gap-1.5" role="timer" aria-label="Sale ends in">
       {parts.map(([label, v]) => (
-        <div key={label} className="min-w-16 rounded-2xl border border-white/15 bg-white/10 px-2.5 py-2 text-center text-white">
-          <div className="tabular font-display text-[26px] font-semibold leading-[1.1]">{String(v).padStart(2, "0")}</div>
-          <div className="text-xs uppercase tracking-[0.08em] text-white/70">{label}</div>
+        <div key={label} className="min-w-[60px] rounded-lg bg-[#0d2b3a] px-1.5 py-2 text-center text-white">
+          <div className="tabular font-display text-2xl font-bold leading-[1.1]">{String(v).padStart(2, "0")}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#cfe3e6]">{label}</div>
         </div>
       ))}
     </div>

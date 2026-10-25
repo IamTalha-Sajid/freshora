@@ -115,21 +115,22 @@ export async function getProductBySlug(slug: string): Promise<PProduct | null> {
   return p ? plain(p) : null;
 }
 
-export type LatestReview = { _id: string; name: string; rating: number; comment: string; product: { name: string; slug: string } | null };
+/** Other active products in the same category, topped up with any other products if the category is small. */
+export async function getRelatedProducts(productId: string, categoryId: string, limit = 4): Promise<PProduct[]> {
+  await connectDB();
+  const same = await Product.find({ active: true, category: categoryId, _id: { $ne: productId } }).sort({ createdAt: -1 }).limit(limit).lean();
+  if (same.length >= limit) return plain(same);
+  const ids = [productId, ...same.map((p) => p._id)];
+  const rest = await Product.find({ active: true, _id: { $nin: ids } }).sort({ createdAt: -1 }).limit(limit - same.length).lean();
+  return plain([...same, ...rest]);
+}
+
+export type LatestReview ={ _id: string; name: string; rating: number; comment: string; product: { name: string; slug: string } | null };
 
 export async function getLatestReviews(limit = 6): Promise<LatestReview[]> {
   await connectDB();
   const rows = await Review.find({ approved: true }).sort({ createdAt: -1 }).limit(limit).populate("product", "name slug").lean();
   return plain(rows);
-}
-
-export async function getReviewStats(): Promise<{ count: number; average: number }> {
-  await connectDB();
-  const [row] = await Review.aggregate<{ count: number; average: number }>([
-    { $match: { approved: true } },
-    { $group: { _id: null, count: { $sum: 1 }, average: { $avg: "$rating" } } },
-  ]);
-  return row ? { count: row.count, average: Math.round(row.average * 10) / 10 } : { count: 0, average: 0 };
 }
 
 export async function getApprovedReviews(productId: string) {

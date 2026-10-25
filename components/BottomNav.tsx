@@ -8,11 +8,11 @@ import { useStore } from "@/components/StoreProvider";
 export function BottomNav() {
   const pathname = usePathname();
   const { cartCount, ready, openSheet, sheet } = useStore();
-  const item = "relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl text-xs font-semibold transition";
+  const item = "relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg text-xs font-semibold transition";
   const on = (active: boolean) => (active ? "text-link" : "text-muted");
 
   return (
-    <nav aria-label="Primary" className="glass fixed inset-x-3 bottom-3 z-40 flex rounded-[20px] p-1.5 md:hidden">
+    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-surface p-1.5 md:hidden">
       <Link href="/" className={`${item} ${on(pathname === "/")}`}>
         <Icon name="home" /> Home
       </Link>

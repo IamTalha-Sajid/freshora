@@ -50,28 +50,30 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
   if (query.max != null) chips.push({ label: `Max ${formatPKR(query.max)}`, remove: ["max"] });
   if (query.sale) chips.push({ label: "On sale", remove: ["sale"] });
 
-  const toggle = "flex h-11 w-11 items-center justify-center rounded-full transition";
+  const toggle = "flex h-10 w-[42px] items-center justify-center transition-colors";
 
   return (
-    <div className="container-x py-8">
-      <nav aria-label="Breadcrumb" className="mb-3 text-sm text-muted">
+    <div className="container-x py-5">
+      <nav aria-label="Breadcrumb" className="mb-3 text-[13px] text-muted">
         <Link href="/" className="-mx-2 -my-3 inline-block px-2 py-3 hover:text-link">Home</Link> / <span className="text-fg">Shop</span>
       </nav>
-      <h1 className="title-page">{heading}</h1>
-      <p className="mb-6 mt-1 text-sm text-muted">
-        {total} product{total === 1 ? "" : "s"}
-      </p>
+      <div className="mb-6 flex flex-wrap items-baseline gap-x-3.5">
+        <h1 className="title-page">{heading}</h1>
+        <span className="text-sm text-muted">
+          {total} product{total === 1 ? "" : "s"}
+        </span>
+      </div>
 
-      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-8">
         <FilterShell activeCount={chips.length}>
           <FilterForm query={query} cats={cats} view={view} />
         </FilterShell>
 
-        <div>
+        <div className="min-w-0">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2">
               {chips.map((c) => (
-                <Link key={c.label} href={href(Object.fromEntries([...c.remove.map((k) => [k, null]), ["page", null]]))} className="chip !py-1.5" aria-label={`Remove filter ${c.label}`}>
+                <Link key={c.label} href={href(Object.fromEntries([...c.remove.map((k) => [k, null]), ["page", null]]))} className="inline-flex h-[34px] items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 text-[13px] font-bold transition-colors hover:border-link" aria-label={`Remove filter ${c.label}`}>
                   {c.label} <Icon name="close" size={14} />
                 </Link>
               ))}
@@ -80,11 +82,11 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
           </div>
 
           {products.length === 0 ? (
-            <div className="card flex flex-col items-center gap-3 p-12 text-center">
-              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-link">
+            <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line px-6 py-14 text-center">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface-alt text-link">
                 <Icon name="search" size={26} />
               </span>
-              <p className="font-display text-lg font-semibold">No products match your filters</p>
+              <p className="text-lg font-bold">No products match your filters</p>
               <Link href="/shop" className="btn-outline">
                 Reset filters
               </Link>
@@ -96,7 +98,7 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-[repeat(auto-fill,minmax(230px,1fr))]">
               {products.map((p) => (
                 <ProductCard key={p._id} p={p} />
               ))}
@@ -120,11 +122,11 @@ export default async function ShopPage({ searchParams }: PageProps<"/shop">) {
 
 function ViewToggle({ view, href, toggle }: { view: string; href: (p: Record<string, string | null>) => string; toggle: string }) {
   return (
-    <div className="flex rounded-full border border-line p-0.5" role="group" aria-label="Layout">
-      <Link href={href({ view: null })} aria-label="Grid view" aria-pressed={view === "grid"} className={`${toggle} ${view === "grid" ? "bg-accent text-link" : "text-muted"}`}>
+    <div className="flex overflow-hidden rounded-lg border border-input-line bg-surface" role="group" aria-label="Layout">
+      <Link href={href({ view: null })} aria-label="Grid view" aria-pressed={view === "grid"} className={`${toggle} ${view === "grid" ? "bg-surface-alt text-fg" : "text-muted"}`}>
         <Icon name="grid" size={18} />
       </Link>
-      <Link href={href({ view: "list" })} aria-label="List view" aria-pressed={view === "list"} className={`${toggle} ${view === "list" ? "bg-accent text-link" : "text-muted"}`}>
+      <Link href={href({ view: "list" })} aria-label="List view" aria-pressed={view === "list"} className={`${toggle} ${view === "list" ? "bg-surface-alt text-fg" : "text-muted"}`}>
         <Icon name="list" size={18} />
       </Link>
     </div>
@@ -133,7 +135,7 @@ function ViewToggle({ view, href, toggle }: { view: string; href: (p: Record<str
 
 function FilterForm({ query, cats, view }: { query: { q?: string; category?: string; min?: number; max?: number; sale: boolean; sort?: string }; cats: PCategory[]; view: string }) {
   return (
-    <form action="/shop" className="space-y-4">
+    <form action="/shop" className="space-y-5">
       {view === "list" && <input type="hidden" name="view" value="list" />}
       <div>
         <label className="label" htmlFor="f-q">Search</label>

@@ -15,28 +15,29 @@ export function BundleCard({ b }: { b: PBundle }) {
   const image = b.image ?? items[0]?.product.images[0];
   const save = regular > b.price ? Math.round((1 - b.price / regular) * 100) : 0;
   return (
-    <article className="card card-hover flex h-full flex-col overflow-hidden !rounded-[28px]">
-      <div className="relative aspect-[16/10] bg-surface-alt">
+    <article className="card flex h-full flex-col overflow-hidden">
+      <div className="relative aspect-video bg-surface-alt">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {image && <img src={image} alt="" className="h-full w-full object-contain p-4" loading="lazy" />}
-        {save > 0 && <span className="chip-sale absolute left-3.5 top-4">Save {save}%</span>}
+        {save > 0 && <span className="chip-sale absolute left-3 top-3 !px-2 !py-[3px]">Save {save}%</span>}
       </div>
-      <div className="flex flex-1 flex-col gap-3 p-6">
-        <h3 className="text-[22px] tracking-tight">{b.name}</h3>
-        <ul className="space-y-1 text-sm text-muted">
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <h3 className="text-xl font-bold">{b.name}</h3>
+        <ul className="flex flex-col gap-1.5 text-sm text-fg-2">
           {items.map((i) => (
             <li key={i.product._id} className="flex items-center gap-2">
-              <Icon name="check" size={14} className="shrink-0 text-success" />
+              <Icon name="check" size={14} strokeWidth={2.6} className="shrink-0 text-success" />
               {i.qty} × {i.product.name}
             </li>
           ))}
         </ul>
-        <div className="mt-auto flex items-end justify-between gap-3 pt-2">
-          <div>
-            <div className="tabular font-display text-2xl font-semibold">{formatPKR(b.price)}</div>
-            {save > 0 && <div className="tabular text-xs text-muted line-through">{formatPKR(regular)}</div>}
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line-soft pt-3">
+          <div className="tabular flex items-baseline gap-2">
+            <span className="font-display text-[22px] font-bold">{formatPKR(b.price)}</span>
+            {save > 0 && <span className="text-[13px] text-muted line-through">{formatPKR(regular)}</span>}
           </div>
-          <PopButton className="btn" disabled={!inStock} onClick={() => addToCart({ kind: "bundle", id: b._id, slug: b.slug, name: b.name, price: b.price, image, stock: bundleStock })}>
+          <PopButton className="btn !px-[18px]" disabled={!inStock} onClick={() => addToCart({ kind: "bundle", id: b._id, slug: b.slug, name: b.name, price: b.price, image, stock: bundleStock })}>
+            <Icon name="plus" size={16} strokeWidth={2.4} />
             {inStock ? "Add bundle" : "Unavailable"}
           </PopButton>
         </div>

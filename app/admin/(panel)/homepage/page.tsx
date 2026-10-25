@@ -13,8 +13,11 @@ const SECTION_NAMES: Record<string, string> = {
   featured: "Bestsellers (featured products)",
   sale: "Deals & sale (with countdown)",
   bundles: "Bundles",
-  trust: "Trust strip",
+  trust: "Trust strip (always right under the hero)",
   reviews: "Customer reviews",
+  why: "Why choose us (photo + 4 benefits)",
+  compare: "Comparison table",
+  newsletter: "Newsletter signup",
 };
 
 export default function HomepageAdmin() {
@@ -86,6 +89,30 @@ export default function HomepageAdmin() {
             <button type="button" className="btn-outline" onClick={() => setSettings({ ...s, saleCountdownEnd: "" })}>Clear</button>
           </div>
         </Field>
+      </section>
+
+      <section className="card space-y-4 p-5">
+        <h2 className="font-semibold">Why choose us <span className="text-sm font-normal text-muted">(first two benefits show left of the photo, last two right)</span></h2>
+        <Field label="Photo" hint="Portrait photo or video still, 9:16 works best"><ImageUpload value={s.whyImage ? [s.whyImage] : []} onChange={(v) => setSettings({ ...s, whyImage: v[0] ?? "" })} /></Field>
+        {s.whyItems.map((w, i) => (
+          <div key={i} className="grid gap-2 rounded-lg border p-3">
+            <input className="input" aria-label={`Benefit ${i + 1} title`} placeholder="Title" value={w.title} onChange={(e) => setSettings({ ...s, whyItems: s.whyItems.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />
+            <textarea className="input" rows={2} aria-label={`Benefit ${i + 1} text`} placeholder="Short description" value={w.text} onChange={(e) => setSettings({ ...s, whyItems: s.whyItems.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} />
+            <button type="button" className="btn-danger w-fit" onClick={() => setSettings({ ...s, whyItems: s.whyItems.filter((_, j) => j !== i) })}>Remove</button>
+          </div>
+        ))}
+        {s.whyItems.length < 4 && <button type="button" className="btn-outline" onClick={() => setSettings({ ...s, whyItems: [...s.whyItems, { title: "", text: "" }] })}>+ Add benefit</button>}
+      </section>
+
+      <section className="card space-y-3 p-5">
+        <h2 className="font-semibold">Comparison table rows <span className="text-sm font-normal text-muted">(Freshora vs others)</span></h2>
+        {s.compareRows.map((row, i) => (
+          <div key={i} className="flex gap-2">
+            <input className="input" aria-label={`Row ${i + 1}`} value={row} onChange={(e) => setSettings({ ...s, compareRows: s.compareRows.map((x, j) => (j === i ? e.target.value : x)) })} />
+            <button type="button" className="btn-danger" onClick={() => setSettings({ ...s, compareRows: s.compareRows.filter((_, j) => j !== i) })}>Remove</button>
+          </div>
+        ))}
+        {s.compareRows.length < 10 && <button type="button" className="btn-outline" onClick={() => setSettings({ ...s, compareRows: [...s.compareRows, ""] })}>+ Add row</button>}
       </section>
 
       <section className="space-y-3">

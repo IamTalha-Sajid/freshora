@@ -8,14 +8,14 @@ export const GET = api(async () => getSettings(), { admin: true });
 export const PUT = api(
   async (req) => {
     const data = settingsSchema.parse(await req.json());
-    const unset = (["contactPhone", "contactEmail", "announcementText", "bankDetails", "saleCountdownEnd"] as const).filter((k) => data[k] === undefined);
-    const doc = await Settings.findOneAndUpdate(
+    const unset = (["contactPhone", "contactEmail", "announcementText", "bankDetails", "saleCountdownEnd", "whyImage"] as const).filter((k) => data[k] === undefined);
+    await Settings.findOneAndUpdate(
       { key: "main" },
       { $set: data, ...(unset.length ? { $unset: Object.fromEntries(unset.map((k) => [k, 1])) } : {}) },
-      { upsert: true, returnDocument: "after" }
-    ).lean();
+      { upsert: true }
+    );
     revalidatePath("/", "layout");
-    return doc;
+    return getSettings(); // includes defaults for fields never saved
   },
   { admin: true }
 );

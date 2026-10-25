@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/Icon";
 import { Tip } from "@/components/Tooltip";
 
 function currentIsDark() {
-  const attr = document.documentElement.getAttribute("data-theme");
-  return attr ? attr === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return document.documentElement.getAttribute("data-theme") === "dark";
 }
 
+/** Light/dark switch: the knob slides to the active mode's icon. */
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const [dark, setDark] = useState<boolean | null>(null);
   useEffect(() => setDark(currentIsDark()), []);
@@ -24,18 +25,26 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   const label = dark ? "Switch to light mode" : "Switch to dark mode";
   return (
     <Tip label={label}>
-    <button type="button" onClick={toggle} aria-label={label} className={`flex h-11 w-11 items-center justify-center rounded-full transition hover:bg-accent ${className}`}>
-      {dark ? (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-        </svg>
-      ) : (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-        </svg>
-      )}
-    </button>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={!!dark}
+        aria-label="Dark mode"
+        onClick={toggle}
+        className={`relative flex h-11 w-[68px] shrink-0 items-center rounded-full ${className}`}
+      >
+        <span className="relative h-8 w-[60px] rounded-full border border-input-line bg-surface-alt transition-colors">
+          <span className="absolute inset-y-0 left-2 flex items-center text-muted">
+            <Icon name="sun" size={14} />
+          </span>
+          <span className="absolute inset-y-0 right-2 flex items-center text-muted">
+            <Icon name="moon" size={14} />
+          </span>
+          <span className={`absolute left-0.5 top-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--btn-bg)] text-[var(--btn-fg)] shadow transition-transform duration-200 ${dark ? "translate-x-[28px]" : "translate-x-0"}`}>
+            <Icon name={dark ? "moon" : "sun"} size={14} />
+          </span>
+        </span>
+      </button>
     </Tip>
   );
 }

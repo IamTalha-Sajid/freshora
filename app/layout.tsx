@@ -5,8 +5,8 @@ import { StoreProvider } from "@/components/StoreProvider";
 import { Toaster } from "@/components/Toaster";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"], weight: ["600"] });
-const body = Manrope({ variable: "--font-manrope", subsets: ["latin"], weight: ["400", "600"] });
+const display = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"], weight: ["600", "700", "800"] });
+const body = Manrope({ variable: "--font-manrope", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
 // Absolute base so og:image and canonical URLs resolve. Defaults to the live domain; override with NEXT_PUBLIC_SITE_URL.
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.fresh-ora.store";
@@ -23,10 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4fbfa" },
-    { media: "(prefers-color-scheme: dark)", color: "#06141b" },
-  ],
+  themeColor: "#f4fbfa",
 };
 
 // Runs before first paint so a saved theme never flashes the wrong colors.

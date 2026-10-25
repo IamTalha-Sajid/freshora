@@ -13,8 +13,11 @@ export type SettingsForm = {
   freeShippingThreshold: number;
   bankDetails?: string;
   defaultLowStock: number;
-  homeSections: { id: "categories" | "featured" | "sale" | "bundles" | "trust" | "reviews"; enabled: boolean; title: string }[];
+  homeSections: { id: "categories" | "featured" | "sale" | "bundles" | "trust" | "reviews" | "why" | "compare" | "newsletter"; enabled: boolean; title: string }[];
   trustItems: { icon: string; title: string; text?: string }[];
+  whyItems: { title: string; text: string }[];
+  whyImage?: string;
+  compareRows: string[];
   saleCountdownEnd?: string;
 };
 

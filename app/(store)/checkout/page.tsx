@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
+import { Loader } from "@/components/Loader";
 import { useStore } from "@/components/StoreProvider";
 import { formatPKR, shippingFor } from "@/lib/pricing";
 
@@ -49,9 +50,9 @@ export default function CheckoutPage() {
 
   if (!ready || !pub)
     return (
-      <div className="container-x max-w-5xl py-8" aria-busy="true" aria-label="Loading checkout">
+      <div className="container-x max-w-[1200px] py-8" aria-busy="true" aria-label="Loading checkout">
         <div className="skeleton mb-6 h-12 w-56" />
-        <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="skeleton h-[420px]" />
           <div className="skeleton h-64" />
         </div>
@@ -147,7 +148,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container-x max-w-5xl py-8">
+    <div className="container-x max-w-[1200px] py-8">
       <h1 className="mb-6 title-page">Checkout</h1>
 
       {/* Progress */}
@@ -170,7 +171,7 @@ export default function CheckoutPage() {
         ))}
       </ol>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
         <div>
           {step === 0 && (
             <form onSubmit={next} noValidate className="card space-y-4 p-6">
@@ -215,7 +216,7 @@ export default function CheckoutPage() {
           {step === 1 && (
             <form onSubmit={next} className="card space-y-4 p-6">
               <h2 className="text-xl">Payment method</h2>
-              <label className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border p-4 transition ${method === "cod" ? "border-mint bg-accent" : "border-line"}`}>
+              <label className={`flex min-h-14 cursor-pointer items-center gap-3.5 rounded-xl border p-4 transition ${method === "cod" ? "border-mint bg-accent" : "border-line"}`}>
                 <input type="radio" name="pay" className="h-4 w-4 accent-[var(--mint)]" checked={method === "cod"} onChange={() => setMethod("cod")} />
                 <Icon name="cash" className="text-link" />
                 <span>
@@ -223,7 +224,7 @@ export default function CheckoutPage() {
                   <span className="text-sm text-muted">Pay when your order arrives</span>
                 </span>
               </label>
-              <label className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border p-4 transition ${method === "bank" ? "border-mint bg-accent" : "border-line"}`}>
+              <label className={`flex min-h-14 cursor-pointer items-center gap-3.5 rounded-xl border p-4 transition ${method === "bank" ? "border-mint bg-accent" : "border-line"}`}>
                 <input type="radio" name="pay" className="h-4 w-4 accent-[var(--mint)]" checked={method === "bank"} onChange={() => setMethod("bank")} />
                 <Icon name="lock" className="text-link" />
                 <span>
@@ -232,7 +233,7 @@ export default function CheckoutPage() {
                 </span>
               </label>
               {method === "bank" && (
-                <div className="space-y-3 rounded-2xl bg-surface-alt p-4 text-sm">
+                <div className="space-y-3 rounded-xl bg-surface-alt p-4 text-sm">
                   <p className="whitespace-pre-line">{pub.bankDetails || "Bank details will be shared after you place the order."}</p>
                   <div>
                     <label className="label" htmlFor="c-ref">Transfer reference / transaction ID *</label>
@@ -254,7 +255,7 @@ export default function CheckoutPage() {
             <div className="card space-y-5 p-6">
               <h2 className="text-xl">Review your order</h2>
               <div className="grid gap-4 text-sm sm:grid-cols-2">
-                <div className="rounded-2xl bg-surface-alt p-4">
+                <div className="rounded-xl bg-surface-alt p-4">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-semibold">Deliver to</span>
                     <button className="link text-xs" onClick={() => setStep(0)}>Edit</button>
@@ -263,7 +264,7 @@ export default function CheckoutPage() {
                   <p className="text-muted">{c.phone}</p>
                   <p className="text-muted">{c.address}, {c.city}</p>
                 </div>
-                <div className="rounded-2xl bg-surface-alt p-4">
+                <div className="rounded-xl bg-surface-alt p-4">
                   <div className="mb-1 flex items-center justify-between">
                     <span className="font-semibold">Payment</span>
                     <button className="link text-xs" onClick={() => setStep(1)}>Edit</button>
@@ -272,12 +273,17 @@ export default function CheckoutPage() {
                   {method === "bank" && <p className="text-muted">Ref: {ref}</p>}
                 </div>
               </div>
-              {error && <p className="rounded-xl bg-danger/10 p-3 text-sm text-danger-fg">{error}</p>}
+              {error && <p className="rounded-lg bg-danger/10 p-3 text-sm text-danger-fg">{error}</p>}
               <div className="flex gap-3">
                 <button type="button" className="btn-outline" onClick={() => setStep(1)}>
                   Back
                 </button>
                 <button className="btn !px-8 !py-3" disabled={busy} onClick={place}>
+                  {busy && (
+                    <span data-theme="dark" className="flex">
+                      <Loader size={22} />
+                    </span>
+                  )}
                   {busy ? "Placing order…" : `Place order · ${formatPKR(subtotal + shipping)}`}
                 </button>
               </div>
@@ -286,12 +292,12 @@ export default function CheckoutPage() {
           )}
         </div>
 
-        <aside className="card h-fit space-y-3 p-5 lg:sticky lg:top-28">
+        <aside className="card h-fit space-y-3 p-6 lg:sticky lg:top-40">
           <h2 className="text-lg">Order summary</h2>
           <ul className="space-y-3">
             {cart.map((l) => (
               <li key={l.kind + l.id} className="flex items-center gap-3 text-sm">
-                <div className="relative h-12 w-12 shrink-0 rounded-xl bg-surface-alt">
+                <div className="relative h-[52px] w-[52px] shrink-0 rounded-lg bg-surface-alt">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {l.image && <img src={l.image} alt="" className="h-full w-full object-contain p-1" />}
                   <span className="tabular absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--btn-bg)] px-1 text-xs font-semibold text-[var(--btn-fg)]">{l.qty}</span>
@@ -310,7 +316,7 @@ export default function CheckoutPage() {
             <span className="text-muted">Shipping</span>
             <span className="tabular">{shipping === 0 ? "Free" : formatPKR(shipping)}</span>
           </div>
-          {remaining > 0 && <p className="rounded-xl bg-accent p-2.5 text-xs">Add {formatPKR(remaining)} more for free shipping!</p>}
+          {remaining > 0 && <p className="rounded-[10px] bg-surface-alt px-3.5 py-3 text-[13px] font-semibold">Add {formatPKR(remaining)} more for free shipping!</p>}
           <div className="flex justify-between border-t border-line pt-3 text-lg font-semibold">
             <span>Total</span>
             <span className="tabular">{formatPKR(subtotal + shipping)}</span>

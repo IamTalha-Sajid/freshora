@@ -46,7 +46,7 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
       }
     >
       {threshold > 0 && cart.length > 0 && (
-        <div className="border-b border-line/70 px-5 py-4">
+        <div className="border-b border-line-soft px-5 py-4">
           <p className="mb-2 text-sm font-semibold">
             {remaining > 0 ? (
               <>
@@ -56,7 +56,7 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
               <>🎉 You’ve unlocked free shipping!</>
             )}
           </p>
-          <div className="h-2 overflow-hidden rounded-full bg-accent" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Progress to free shipping">
+          <div className="h-2 overflow-hidden rounded-full bg-surface-alt" role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100} aria-label="Progress to free shipping">
             <div className="h-full w-full origin-left rounded-full bg-teal transition-transform duration-300" style={{ transform: `scaleX(${pct / 100})` }} />
           </div>
         </div>
@@ -75,10 +75,10 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
         </div>
       ) : (
         <>
-          <ul className="divide-y divide-line/70 px-5">
+          <ul className="divide-y divide-line-soft px-5">
             {cart.map((l) => (
               <li key={l.kind + l.id} className="flex gap-3 py-4">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-surface-alt">
+                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[10px] bg-surface-alt">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {l.image && <img src={l.image} alt="" className="h-full w-full object-contain p-1" />}
                 </div>
@@ -87,14 +87,14 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
                   {l.kind === "bundle" && <span className="chip mt-0.5">Bundle</span>}
                   <p className="tabular mt-0.5 text-sm text-muted">{formatPKR(l.price)}</p>
                   <div className="mt-2 flex items-center justify-between">
-                    <div className="flex items-center rounded-full border border-line">
-                      <button className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent" onClick={() => setQty(l.kind, l.id, l.qty - 1)} aria-label={`Decrease ${l.name}`}>
+                    <div className="flex items-center rounded-lg border border-input-line">
+                      <button className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-surface-alt" onClick={() => setQty(l.kind, l.id, l.qty - 1)} aria-label={`Decrease ${l.name}`}>
                         <Icon name="minus" size={16} />
                       </button>
                       <span className="tabular w-7 text-center text-sm font-semibold" aria-live="polite">
                         {l.qty}
                       </span>
-                      <button className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent" onClick={() => setQty(l.kind, l.id, l.qty + 1)} aria-label={`Increase ${l.name}`}>
+                      <button className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-surface-alt" onClick={() => setQty(l.kind, l.id, l.qty + 1)} aria-label={`Increase ${l.name}`}>
                         <Icon name="plus" size={16} />
                       </button>
                     </div>
@@ -108,12 +108,12 @@ export function CartDrawer({ shipping, upsell }: { shipping: ShippingInfo; upsel
           </ul>
 
           {suggestions.length > 0 && (
-            <div className="border-t border-line/70 px-5 py-4">
+            <div className="border-t border-line-soft px-5 py-4">
               <p className="mb-3 text-sm font-semibold">Complete your routine</p>
               <ul className="space-y-3">
                 {suggestions.map((p) => (
                   <li key={p._id} className="flex items-center gap-3">
-                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-surface-alt">
+                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-alt">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={p.images[0]} alt="" className="h-full w-full object-contain p-1" />
                     </div>

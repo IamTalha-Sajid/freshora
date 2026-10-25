@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* ---------- Design tokens ----------
-   Light is the default. Dark applies with [data-theme="dark"], or by system preference
-   when the visitor hasn't chosen (no data-theme attribute on <html>).
+   Light is the default. Dark applies only with [data-theme="dark"], which the visitor
+   chooses with the theme toggle (saved in localStorage); system preference is ignored.
    The admin panel follows the same theme and has its own toggle. */
 :root,
 [data-theme="light"] {
@@ -27,6 +27,12 @@
   --outline: #158c96;
   --outline-fg: #0f6f78;
   --accent-fill: rgb(43 193 177 / 0.16);
+  --line-soft: #e6f1ef;
+  --input-line: #c3dcd8;
+  --input-bg: #f4fbfa;
+  --fg-2: #36505d;
+  --sale-soft: #fbeceb;
+  --star-off: #d3e8e5;
 
   --success: #1e9e6a;
   --warning: #e0a63b;
@@ -53,12 +59,18 @@
 [data-theme="dark"] {
   color-scheme: dark;
   --page: #06141b;
-  --surface: #0d2230;
-  --surface-alt: #0a1c27;
+  --surface: #0c222c;
+  --surface-alt: #123341;
   --raised: #143141;
   --fg: #e6f4f2;
   --muted: #9db9bf;
-  --line: #1e3c4b;
+  --line: #1f4250;
+  --line-soft: #183846;
+  --input-line: #2a4f5e;
+  --input-bg: #081a22;
+  --fg-2: #b8cfd4;
+  --sale-soft: #3a1c1c;
+  --star-off: #2a4a59;
   --link: #4fd3c4;
   --active: #4fd3c4;
 
@@ -87,43 +99,6 @@
   --card-shadow-hover: 0 0 28px rgb(43 193 177 / 0.15);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    color-scheme: dark;
-    --page: #06141b;
-    --surface: #0d2230;
-    --surface-alt: #0a1c27;
-    --raised: #143141;
-    --fg: #e6f4f2;
-    --muted: #9db9bf;
-    --line: #1e3c4b;
-    --link: #4fd3c4;
-    --active: #4fd3c4;
-    --btn-bg: #2bc1b1;
-    --btn-fg: #06141b;
-    --btn-bg-hover: #4fd3c4;
-    --outline: #2bc1b1;
-    --outline-fg: #2bc1b1;
-    --accent-fill: rgb(43 193 177 / 0.18);
-    --danger-fg: #f08a86;
-    --warn-bg: rgb(224 166 59 / 0.18);
-    --warn-fg: #f3c969;
-    --info-bg: rgb(96 165 250 / 0.18);
-    --info-fg: #93c5fd;
-    --ok-bg: rgb(52 211 153 / 0.16);
-    --ok-fg: #6ee7b7;
-    --ship-bg: rgb(129 140 248 / 0.2);
-    --ship-fg: #a5b4fc;
-    --glass-bg: rgb(13 34 48 / 0.55);
-    --glass-sat: 160%;
-    --glass-border: rgb(43 193 177 / 0.18);
-    --glass-hl: inset 0 1px 0 rgb(255 255 255 / 0.06);
-    --glass-shadow: 0 8px 32px rgb(0 0 0 / 0.45), 0 0 24px rgb(43 193 177 / 0.08);
-    --card-shadow: 0 0 0 1px rgb(43 193 177 / 0.04);
-    --card-shadow-hover: 0 0 28px rgb(43 193 177 / 0.15);
-  }
-}
-
 @theme inline {
   --color-navy: var(--navy);
   --color-teal: var(--teal);
@@ -149,6 +124,12 @@
   --color-ship-bg: var(--ship-bg);
   --color-ship-fg: var(--ship-fg);
   --color-accent: var(--accent-fill);
+  --color-line-soft: var(--line-soft);
+  --color-input-line: var(--input-line);
+  --color-input-bg: var(--input-bg);
+  --color-fg-2: var(--fg-2);
+  --color-sale-soft: var(--sale-soft);
+  --color-star-off: var(--star-off);
   /* Aliases used by the admin screens */
   --color-brand: var(--btn-bg);
   --color-brand-dark: var(--btn-bg-hover);
@@ -262,31 +243,10 @@
   }
 }
 
-/* The floating header and bottom nav blur what is behind them; give them a solid surface when blur is off or unwanted. */
-@media (prefers-reduced-transparency: reduce) {
-  header > div {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background-color: #0d2b3a;
-  }
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  header > div {
-    background-color: #0d2b3a;
-  }
-}
-
 /* ---------- Logo swap (light/dark) ---------- */
 .logo-on-dark { display: none; }
 [data-theme="dark"] .logo-on-light { display: none; }
 [data-theme="dark"] .logo-on-dark { display: block; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) .logo-on-light { display: none; }
-  :root:not([data-theme]) .logo-on-dark { display: block; }
-}
-/* Transparent header sits over the dark hero, so it always uses the light-text logo. */
-[data-over-hero="true"] .logo-on-light { display: none !important; }
-[data-over-hero="true"] .logo-on-dark { display: block !important; }
 
 /* ---------- Components ---------- */
 .btn-arrow {
@@ -303,7 +263,7 @@
   color: var(--mint);
 }
 .btn {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition duration-200 ease-out hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-bold transition duration-200 ease-out disabled:cursor-not-allowed disabled:opacity-50;
   background: var(--btn-bg);
   color: var(--btn-fg);
 }
@@ -311,7 +271,7 @@
   background: var(--btn-bg-hover);
 }
 .btn-mint {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition duration-200 ease-out hover:-translate-y-px;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-bold transition duration-200 ease-out;
   background: var(--mint);
   color: #06141b;
 }
@@ -319,7 +279,7 @@
   background: #4fd3c4;
 }
 .btn-outline {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold transition duration-200 ease-out disabled:opacity-50;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-5 py-2 text-sm font-bold transition duration-200 ease-out disabled:opacity-50;
   border-color: var(--outline);
   color: var(--outline-fg);
   background: transparent;
@@ -328,14 +288,14 @@
   background: var(--accent-fill);
 }
 .btn-ghost {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition duration-200 ease-out;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition duration-200 ease-out;
   color: var(--fg);
 }
 .btn-ghost:hover {
   background: var(--accent-fill);
 }
 .btn-danger {
-  @apply inline-flex items-center justify-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition duration-200 disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition duration-200 disabled:opacity-50;
   border-color: color-mix(in srgb, var(--danger) 40%, transparent);
   color: var(--danger-fg);
 }
@@ -343,7 +303,7 @@
   background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 .btn-danger-solid {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition duration-200 ease-out;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 py-2 text-sm font-semibold transition duration-200 ease-out;
   background: #b3342f; /* same in both themes: white text on it passes AA */
   color: #fff;
 }
@@ -351,9 +311,9 @@
   filter: brightness(0.92);
 }
 .input {
-  @apply w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition duration-200;
-  background: var(--surface);
-  border-color: var(--line);
+  @apply w-full rounded-lg border px-3.5 py-2.5 text-sm outline-none transition duration-200;
+  background: var(--input-bg);
+  border-color: var(--input-line);
   color: var(--fg);
   min-height: 44px;
 }
@@ -370,45 +330,43 @@
   color: var(--muted);
 }
 .card {
-  @apply rounded-3xl border;
+  @apply rounded-2xl border;
   background: var(--surface);
   border-color: var(--line);
-  box-shadow: var(--card-shadow);
 }
 .card-hover {
-  @apply transition duration-200 ease-out;
+  @apply transition-colors duration-200 ease-out;
 }
 .card-hover:hover {
-  box-shadow: var(--card-shadow-hover);
-  transform: translateY(-2px);
+  border-color: #9fd8d0;
 }
 .chip {
-  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold;
   background: var(--accent-fill);
   color: var(--link);
 }
 .chip-sale {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
-  background: var(--danger);
+  @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-extrabold;
+  background: #b3342f;
   color: #fff;
 }
-/* Section / page headings: small teal eyebrow over a large display title. */
+/* Section / page headings: small teal eyebrow over a display title. */
 .eyebrow {
-  @apply mb-2 text-[13px] font-semibold uppercase tracking-[0.1em];
+  @apply mb-2 text-xs font-bold uppercase tracking-[0.08em];
   color: var(--link);
 }
 .title-section {
-  @apply font-display font-semibold;
-  font-size: clamp(2.25rem, 4vw, 3.25rem);
-  line-height: 1.05;
+  @apply font-display font-bold;
+  font-size: clamp(1.625rem, 2.4vw, 2rem);
+  line-height: 1.1;
 }
 .title-page {
-  @apply font-display font-semibold;
-  font-size: clamp(2rem, 3.4vw, 2.75rem);
-  line-height: 1.05;
+  @apply font-display font-bold;
+  font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+  line-height: 1.1;
 }
 .container-x {
-  @apply mx-auto w-full max-w-[1920px] px-4 sm:px-[clamp(16px,4vw,56px)];
+  @apply mx-auto w-full max-w-[1920px] px-4 sm:px-[clamp(16px,3vw,56px)];
 }
 .link {
   color: var(--link);
@@ -419,18 +377,42 @@
 .text-muted {
   color: var(--muted);
 }
-/* Layout-matched placeholder for content that takes >1s to arrive. Pulses only when motion is allowed. */
+/* Layout-matched placeholder for content that takes >1s to arrive. Shimmers only when motion is allowed. */
 .skeleton {
   border-radius: 1rem;
   background: var(--surface-alt);
 }
 @media (prefers-reduced-motion: no-preference) {
   .skeleton {
-    animation: skeleton-pulse 1.4s ease-in-out infinite;
+    background: linear-gradient(90deg, var(--surface-alt) 0, color-mix(in srgb, var(--surface-alt) 55%, var(--surface)) 160px, var(--surface-alt) 320px);
+    background-size: 800px 100%;
+    animation: fr-shimmer 1.4s linear infinite;
   }
 }
-@keyframes skeleton-pulse {
-  50% { opacity: 0.55; }
+@keyframes fr-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* ---------- Logo loader: the F mark fills with a rising rinse while bubbles float up ---------- */
+@keyframes fr-fill {
+  0% { transform: translate(-25%, 105%) rotate(0deg); }
+  100% { transform: translate(-25%, -12%) rotate(300deg); }
+}
+@keyframes fr-bubble {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateY(-140%) scale(1); opacity: 0; }
+}
+@keyframes fr-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-fr-anim] {
+    animation: fr-pulse 1.6s ease-in-out infinite !important;
+    transform: none !important;
+  }
 }
 .scrollbar-none {
   scrollbar-width: none;

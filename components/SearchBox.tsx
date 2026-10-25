@@ -8,7 +8,7 @@ import { formatPKR } from "@/lib/pricing";
 
 type Suggestion = { _id: string; name: string; slug: string; image?: string; price: number };
 
-export function SearchBox({ tone = "default", autoFocus = false, onDone, className = "" }: { tone?: "default" | "on-hero"; autoFocus?: boolean; onDone?: () => void; className?: string }) {
+export function SearchBox({ autoFocus = false, onDone, className = "" }: { autoFocus?: boolean; onDone?: () => void; className?: string }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [items, setItems] = useState<Suggestion[]>([]);
@@ -53,33 +53,28 @@ export function SearchBox({ tone = "default", autoFocus = false, onDone, classNa
     router.push(q.trim() ? `/shop?q=${encodeURIComponent(q.trim())}` : "/shop");
   }
 
-  const field =
-    tone === "on-hero"
-      ? "border-white/20 bg-[#06141b]/25 text-white placeholder:text-white/70 focus:border-mint"
-      : "border-line bg-surface/70 text-fg placeholder:text-muted focus:border-mint";
-
   return (
     <div ref={wrap} className={`relative w-full ${className}`}>
-      <form onSubmit={go} role="search">
-        <label className={tone === "on-hero" ? "pointer-events-none absolute left-11 top-1/2 z-10 -translate-y-1/2 text-sm font-semibold" : "sr-only"} htmlFor="site-search">
-          {tone === "on-hero" ? "Search" : "Search products"}
+      <form onSubmit={go} role="search" className="flex h-[46px] overflow-hidden rounded-lg border border-input-line bg-input-bg transition-shadow focus-within:border-mint focus-within:shadow-[0_0_0_3px_rgb(43_193_177/0.25)]">
+        <label className="sr-only" htmlFor="site-search">
+          Search products
         </label>
-        <div className="relative">
-          <Icon name="search" size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 opacity-70" />
-          <input
-            id="site-search"
-            autoFocus={autoFocus}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onFocus={() => items.length && setOpen(true)}
-            autoComplete="off"
-            placeholder={tone === "on-hero" ? "toothpaste, brushes, floss…" : "Search toothpaste, brushes, floss…"}
-            className={`h-11 w-full rounded-full border ${tone === "on-hero" ? "pl-[6.5rem]" : "pl-11"} pr-4 text-sm outline-none transition duration-200 focus:shadow-[0_0_0_3px_rgb(43_193_177/0.25)] ${field}`}
-          />
-        </div>
+        <input
+          id="site-search"
+          autoFocus={autoFocus}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          onFocus={() => items.length && setOpen(true)}
+          autoComplete="off"
+          placeholder="Search toothpaste, brushes, floss…"
+          className="min-w-0 flex-1 bg-transparent px-4 text-sm text-fg outline-none placeholder:text-muted"
+        />
+        <button type="submit" aria-label="Search" className="flex w-[52px] items-center justify-center bg-[var(--btn-bg)] text-[var(--btn-fg)] transition-colors hover:bg-[var(--btn-bg-hover)]">
+          <Icon name="search" size={18} strokeWidth={2.2} />
+        </button>
       </form>
       {open && q.trim().length >= 2 && (
-        <div className="glass-strong absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl text-fg animate-rise">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-line bg-surface text-fg shadow-[0_16px_40px_rgb(6_20_27/0.18)] animate-rise">
           {items.length === 0 ? (
             <p className="px-4 py-4 text-sm text-muted">{busy ? "Searching…" : `No products found for “${q.trim()}”.`}</p>
           ) : (
@@ -92,7 +87,7 @@ export function SearchBox({ tone = "default", autoFocus = false, onDone, classNa
                       setOpen(false);
                       onDone?.();
                     }}
-                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-accent"
+                    className="flex items-center gap-3 px-3 py-2.5 hover:bg-surface-alt"
                   >
                     <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-surface-alt">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -103,8 +98,8 @@ export function SearchBox({ tone = "default", autoFocus = false, onDone, classNa
                   </Link>
                 </li>
               ))}
-              <li className="border-t border-line/70">
-                <button onClick={go} className="w-full px-4 py-3 text-left text-sm font-semibold text-link hover:bg-accent">
+              <li className="border-t border-line-soft">
+                <button onClick={go} className="w-full px-4 py-3 text-left text-sm font-bold text-link hover:bg-surface-alt">
                   See all results for “{q.trim()}” →
                 </button>
               </li>

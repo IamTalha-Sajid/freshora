@@ -26,18 +26,18 @@ export function FilterShell({ children, activeCount }: { children: ReactNode; ac
       <aside
         className={
           open
-            ? "glass-strong fixed inset-y-3 left-3 z-[61] flex w-[88%] max-w-sm animate-slide-in-left flex-col overflow-y-auto rounded-3xl p-5 lg:static lg:z-auto lg:w-auto lg:max-w-none lg:animate-none lg:overflow-visible lg:rounded-2xl"
-            : "hidden lg:block"
+            ? "fixed inset-y-3 left-3 z-[61] flex w-[88%] max-w-sm animate-slide-in-left flex-col overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-[0_24px_48px_rgb(6_20_27/0.25)] lg:sticky lg:top-40 lg:z-auto lg:w-auto lg:max-w-none lg:animate-none lg:overflow-visible lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none"
+            : "hidden lg:sticky lg:top-40 lg:block"
         }
         aria-label="Filters"
       >
         <div className="mb-4 flex items-center justify-between lg:hidden">
-          <h2 className="text-lg">Filters</h2>
-          <button onClick={() => setOpen(false)} aria-label="Close filters" className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-accent">
+          <h2 className="text-lg font-bold">Filters</h2>
+          <button onClick={() => setOpen(false)} aria-label="Close filters" className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-alt">
             <Icon name="close" />
           </button>
         </div>
-        <div className="lg:card lg:p-5">{children}</div>
+        <div>{children}</div>
       </aside>
     </div>
   );

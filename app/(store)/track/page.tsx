@@ -20,12 +20,12 @@ export default function TrackPage() {
   }
 
   return (
-    <div className="container-x py-10">
-      <form onSubmit={submit} className="card mx-auto max-w-md space-y-4 p-6 sm:p-8">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-link">
+    <div className="container-x py-12">
+      <form onSubmit={submit} className="card mx-auto max-w-[460px] space-y-4 !rounded-[20px] p-6 sm:p-9">
+        <span className="flex h-[52px] w-[52px] items-center justify-center rounded-xl bg-surface-alt text-link">
           <Icon name="track" size={24} />
         </span>
-        <h1 className="text-3xl">Track your order</h1>
+        <h1 className="text-[30px] font-bold">Track your order</h1>
         <p className="text-sm text-muted">Enter the order number from your confirmation and the phone number you used at checkout.</p>
         <div>
           <label className="label" htmlFor="t-num">Order number</label>
@@ -36,7 +36,7 @@ export default function TrackPage() {
           <input id="t-phone" className="input" required type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
         {error && <p className="text-sm text-danger-fg">{error}</p>}
-        <button className="btn w-full !py-3">Track order</button>
+        <button className="btn w-full !h-[52px] !text-[15px]">Track order</button>
       </form>
     </div>
   );

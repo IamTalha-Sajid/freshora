@@ -84,9 +84,18 @@ export const settingsSchema = z.object({
   freeShippingThreshold: z.coerce.number().min(0),
   bankDetails: optStr,
   defaultLowStock: z.coerce.number().int().min(0),
-  homeSections: z.array(z.object({ id: z.enum(["categories", "featured", "sale", "bundles", "trust", "reviews"]), enabled: z.boolean(), title: z.string() })),
+  homeSections: z.array(z.object({ id: z.enum(["categories", "featured", "sale", "bundles", "trust", "reviews", "why", "compare", "newsletter"]), enabled: z.boolean(), title: z.string() })),
   trustItems: z.array(z.object({ icon: z.string().default("shield"), title: z.string().trim().min(1), text: optStr })).default([]),
+  whyItems: z.array(z.object({ title: z.string().trim().min(1).max(80), text: z.string().trim().min(1).max(300) })).max(4).default([]),
+  whyImage: optSafeUrl,
+  compareRows: z.array(z.string().trim().min(1).max(80)).max(10).default([]),
   saleCountdownEnd: optDate,
+});
+
+export const newsletterSchema = z.object({
+  email: z.string().trim().toLowerCase().max(120).email("Enter a valid email"),
+  /** Honeypot: real visitors never see or fill this. */
+  website: z.string().max(0).optional(),
 });
 
 export const checkoutSchema = z.object({
