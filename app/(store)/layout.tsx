@@ -21,7 +21,6 @@ const chip = "flex h-[30px] items-center gap-1.5 rounded-md border border-[#1e3c
 
 export default async function StoreLayout({ children }: LayoutProps<"/">) {
   const [settings, categories, upsell] = await Promise.all([getSettings(), getCategories(), getFeaturedProducts(6)]);
-  const roots = categories.filter((c) => !c.parent).slice(0, 6);
   const announcement = settings.announcementEnabled && !!settings.announcementText;
   const phone = settings.contactPhone;
 
@@ -75,22 +74,11 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
             </a>
           </div>
 
-          <div className="grid gap-10 py-12 text-sm md:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(150px,1fr))]">
+          <div className="grid gap-10 py-12 text-sm md:grid-cols-[minmax(0,1.4fr)_minmax(150px,1fr)]">
             <div className="flex flex-col gap-4">
               <Logo className="h-9" onDark />
               <p className="max-w-[300px] text-pretty text-[#9db9bf]">Dental and oral-care essentials, delivered to your door.</p>
             </div>
-            <nav aria-label="Shop" className="flex flex-col">
-              <h3 className={footHead}>Shop</h3>
-              <Link href="/shop" className={footLink}>
-                All products
-              </Link>
-              {roots.map((c) => (
-                <Link key={c._id} href={`/category/${c.slug}`} className={footLink}>
-                  {c.name}
-                </Link>
-              ))}
-            </nav>
             <nav aria-label="Help" className="flex flex-col">
               <h3 className={footHead}>Help</h3>
               <Link href="/track" className={footLink}>

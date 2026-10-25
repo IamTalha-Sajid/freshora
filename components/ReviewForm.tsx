@@ -9,6 +9,7 @@ const MAX_IMAGES = 5;
 export function ReviewForm({ productId }: { productId: string }) {
   const [form, setForm] = useState({ name: "", email: "", rating: 5, comment: "" });
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(0);
@@ -55,6 +56,12 @@ export function ReviewForm({ productId }: { productId: string }) {
       <div className="flex items-center gap-3 rounded-xl bg-surface-alt p-4 text-sm font-semibold">
         <Icon name="check" className="shrink-0 text-success" /> Thanks! Your review will appear once it has been approved.
       </div>
+    );
+  if (!open)
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="h-[46px] rounded-lg border border-fg font-extrabold transition-colors hover:bg-surface-alt">
+        Write a review
+      </button>
     );
   return (
     <form onSubmit={submit} className="card space-y-3.5 p-5">
