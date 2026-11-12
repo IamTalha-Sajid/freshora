@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/Icon";
 
 const COUNT = 4;
@@ -13,7 +13,6 @@ const P = "max-w-[440px] text-pretty text-lg";
 const CTA = "mt-2 flex h-[50px] items-center gap-2.5 rounded-lg px-6 font-extrabold text-white transition-colors";
 const PHOTO = "relative -mb-[88px] -mt-14 -mr-[clamp(28px,5vw,72px)] min-h-[460px] self-stretch max-[559px]:order-first max-[559px]:-mx-6 max-[559px]:-mt-8 max-[559px]:mb-0 max-[559px]:min-h-[260px]";
 const PHOTO_IMG = "absolute inset-0 h-full w-full object-cover [-webkit-mask-image:linear-gradient(to_right,transparent_0,#000_22%)] [mask-image:linear-gradient(to_right,transparent_0,#000_22%)] max-[559px]:[-webkit-mask-image:linear-gradient(to_bottom,#000_70%,transparent)] max-[559px]:[mask-image:linear-gradient(to_bottom,#000_70%,transparent)]";
-const CONTROL = "flex h-10 w-10 items-center justify-center rounded-lg border border-[#d3e8e5] bg-white text-[#0d2b3a] shadow-[0_1px_3px_rgba(13,43,58,.12)]";
 
 function Cta({ href, className, children }: { href: string; className: string; children: string }) {
   return (
@@ -27,14 +26,7 @@ function Cta({ href, className, children }: { href: string; className: string; c
 export function HeroCarousel() {
   const [slide, setSlide] = useState(0);
   const [hover, setHover] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [reduced, setReduced] = useState(false);
-  const [tick, setTick] = useState(0);
-
-  const go = useCallback((i: number) => {
-    setSlide((i + COUNT) % COUNT);
-    setTick((t) => t + 1);
-  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -44,14 +36,13 @@ export function HeroCarousel() {
     return () => mq.removeEventListener("change", on);
   }, []);
 
-  const playing = !paused && !reduced;
   useEffect(() => {
-    if (!playing || hover) return;
+    if (reduced || hover) return;
     const id = setInterval(() => {
       if (!document.hidden) setSlide((s) => (s + 1) % COUNT);
     }, 6000);
     return () => clearInterval(id);
-  }, [playing, hover, tick]);
+  }, [reduced, hover]);
 
   return (
     <section className="container-x mt-6">
@@ -116,34 +107,6 @@ export function HeroCarousel() {
               <img src="/hero/foam-cut.png" alt="" className="absolute bottom-[15%] right-[3%] z-[1] h-[78%] w-auto drop-shadow-[0_14px_20px_rgba(40,20,110,.14)]" />
               <img src="/hero/strips-box.png" alt="" className="absolute bottom-[13%] left-[4%] z-[2] h-[60%] w-auto drop-shadow-[0_16px_22px_rgba(40,20,110,.2)]" />
             </div>
-          </div>
-        </div>
-
-        <div className="absolute bottom-6 left-[clamp(28px,5vw,72px)] right-[clamp(16px,3vw,32px)] flex items-center gap-4">
-          <div className="flex gap-2">
-            {Array.from({ length: COUNT }, (_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Go to slide ${i + 1}`}
-                aria-current={i === slide}
-                onClick={() => go(i)}
-                className={`h-2 rounded-full p-0 transition-[width] duration-300 ${i === slide ? "w-7 bg-[#0d2b3a]" : "w-2 bg-[#0d2b3a]/25"}`}
-              />
-            ))}
-          </div>
-          <div className="ml-auto flex gap-2">
-            {!reduced && (
-              <button type="button" aria-label={playing ? "Pause carousel" : "Play carousel"} onClick={() => setPaused((p) => !p)} className={CONTROL}>
-                <Icon name={playing ? "pause" : "play"} size={16} fill="currentColor" stroke="none" />
-              </button>
-            )}
-            <button type="button" aria-label="Previous slide" onClick={() => go(slide - 1)} className={CONTROL}>
-              <Icon name="chevron-left" size={18} strokeWidth={2.4} />
-            </button>
-            <button type="button" aria-label="Next slide" onClick={() => go(slide + 1)} className={CONTROL}>
-              <Icon name="chevron-right" size={18} strokeWidth={2.4} />
-            </button>
           </div>
         </div>
       </div>
